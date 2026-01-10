@@ -1,0 +1,220 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}ICT Equipment Dashboard - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-white mb-2">
+                <i class="fas fa-laptop me-3"></i>ICT Equipment Management
+            </h1>
+            <p class="text-muted">Track and manage all ICT equipment across directorates</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Equipment</h6>
+                            <h2 class="text-white mb-0">{{ total_equipment|intcomma }}</h2>
+                        </div>
+                        <div class="text-primary" style="font-size: 2.5rem;">
+                            <i class="fas fa-server"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Available</h6>
+                            <h2 class="text-success mb-0">{{ available_count|intcomma }}</h2>
+                        </div>
+                        <div class="text-success" style="font-size: 2.5rem;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Assigned</h6>
+                            <h2 class="text-info mb-0">{{ assigned_count|intcomma }}</h2>
+                        </div>
+                        <div class="text-info" style="font-size: 2.5rem;">
+                            <i class="fas fa-hand-holding"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Needs Repair</h6>
+                            <h2 class="text-danger mb-0">{{ needs_repair_count|intcomma }}</h2>
+                        </div>
+                        <div class="text-danger" style="font-size: 2.5rem;">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Recent Assignments -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <h5 class="text-white mb-0">
+                        <i class="fas fa-hand-holding me-2"></i>Recent Assignments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_assignments %}
+                        <div class="list-group list-group-flush">
+                            {% for assignment in recent_assignments %}
+                            <div class="list-group-item bg-transparent border-bottom" style="border-color: var(--border) !important;">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-white mb-1">{{ assignment.equipment }}</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-building me-1"></i>{{ assignment.directorate }}<br>
+                                            <i class="fas fa-user me-1"></i>{{ assignment.assigned_to.get_full_name|default:assignment.assigned_to.username }}<br>
+                                            <i class="fas fa-door-open me-1"></i>{{ assignment.room_number|default:"N/A" }}
+                                        </small>
+                                    </div>
+                                    <small class="text-muted">{{ assignment.assigned_date|date:"M d, Y" }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-3">
+                            <a href="{% url 'equipment:assignment_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No recent assignments</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Issues -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <h5 class="text-white mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Active Issues
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if active_issues %}
+                        <div class="list-group list-group-flush">
+                            {% for issue in active_issues %}
+                            <div class="list-group-item bg-transparent border-bottom" style="border-color: var(--border) !important;">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-white mb-1">{{ issue.title }}</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-laptop me-1"></i>{{ issue.equipment }}<br>
+                                            <span class="badge bg-{{ issue.severity }}">{{ issue.get_severity_display }}</span>
+                                        </small>
+                                    </div>
+                                    <small class="text-muted">{{ issue.reported_at|date:"M d" }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-3">
+                            <a href="{% url 'equipment:issue_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No active issues</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recurring Problems -->
+    {% if recurring_issues %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <h5 class="text-white mb-0">
+                        <i class="fas fa-exclamation-circle me-2 text-warning"></i>Recurring Problems & Suggestions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Equipment</th>
+                                    <th>Issue Count</th>
+                                    <th>Automated Suggestion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in recurring_issues %}
+                                <tr>
+                                    <td>{{ item.equipment }}</td>
+                                    <td><span class="badge bg-warning">{{ item.issue_count }} issues</span></td>
+                                    <td><i class="fas fa-lightbulb me-2 text-warning"></i>{{ item.suggestion }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-body">
+                    <h5 class="text-white mb-3">Quick Actions</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'equipment:equipment_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Record New Equipment
+                        </a>
+                        <a href="{% url 'equipment:assignment_create' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-hand-holding me-2"></i>Assign Device
+                        </a>
+                        <a href="{% url 'equipment:issue_create' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Report Issue
+                        </a>
+                        <a href="{% url 'equipment:directorate_create' %}" class="btn btn-outline-info">
+                            <i class="fas fa-building me-2"></i>Add Directorate
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

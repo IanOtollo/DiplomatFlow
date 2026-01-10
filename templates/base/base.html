@@ -1,0 +1,537 @@
+{% load static %}
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MOFA Task Tracker{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+    <link rel="alternate icon" href="{% static 'img/favicon.svg' %}">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+    
+        <!-- Theme styling consolidated in static/css/style.css -->
+    <style></style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home:index' %}">
+                <i class="fas fa-tasks"></i>
+                <div class="brand-text">
+                    <div class="brand-main">MOFA Task Tracker</div>
+                    <div class="brand-subtitle">Diplomatic Workflow</div>
+                </div>
+                <span class="version-badge">V 2.0</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.namespace == 'home' and request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'home:index' %}">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.namespace == 'tasks' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'tasks:dashboard' %}">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.namespace == 'tasks' and request.resolver_match.url_name == 'task_list' %}active{% endif %}" href="{% url 'tasks:task_list' %}">
+                            <i class="fas fa-tasks me-1"></i>Tasks
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.namespace == 'tasks' and request.resolver_match.url_name == 'task_create' %}active{% endif %}" href="{% url 'tasks:task_create' %}">
+                            <i class="fas fa-plus me-1"></i>Create Task
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'equipment' %}active{% endif %}" href="#" id="equipmentDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-laptop me-1"></i>Equipment
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="equipmentDropdown">
+                            <li><a class="dropdown-item" href="{% url 'equipment:dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{% url 'equipment:equipment_list' %}"><i class="fas fa-list me-2"></i>All Equipment</a></li>
+                            <li><a class="dropdown-item" href="{% url 'equipment:equipment_create' %}"><i class="fas fa-plus me-2"></i>Record Equipment</a></li>
+                            <li><a class="dropdown-item" href="{% url 'equipment:assignment_list' %}"><i class="fas fa-hand-holding me-2"></i>Assignments</a></li>
+                            <li><a class="dropdown-item" href="{% url 'equipment:directorate_list' %}"><i class="fas fa-building me-2"></i>Directorates</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'equipment:issue_list' %}"><i class="fas fa-exclamation-triangle me-2"></i>Issues</a></li>
+                        </ul>
+                    </li>
+                    {% if user.is_staff or user.is_superuser %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="usersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-users me-1"></i>Users
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="usersDropdown">
+                            <li><a class="dropdown-item" href="{% url 'users:user_list' %}"><i class="fas fa-list me-2"></i>All Users</a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:register' %}"><i class="fas fa-user-plus me-2"></i>Add User</a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:admin_user_management' %}"><i class="fas fa-cog me-2"></i>Manage Users</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'users:password_reset_requests' %}"><i class="fas fa-key me-2"></i>Password Reset Requests</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-bar me-1"></i>Reports
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
+                            <li><a class="dropdown-item" href="{% url 'reports:task_analytics' %}"><i class="fas fa-chart-line me-2"></i>Task Analytics</a></li>
+                            <li><a class="dropdown-item" href="{% url 'reports:team_performance' %}"><i class="fas fa-users me-2"></i>Team Performance</a></li>
+                            <li><a class="dropdown-item" href="{% url 'reports:monthly_report' %}"><i class="fas fa-calendar me-2"></i>Monthly Report</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'reports:export_data' %}"><i class="fas fa-download me-2"></i>Export Data</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>{{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'users:profile' %}">
+                                <i class="fas fa-user-circle me-2"></i>Profile
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:password_change' %}">
+                                <i class="fas fa-key me-2"></i>Change Password
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:profile_update' %}">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </a></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-cog me-2"></i>Settings
+                            </a></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-bell me-2"></i>Notifications
+                            </a></li>
+                            {% if user.is_staff or user.is_superuser %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item admin-option" href="{% url 'admin:index' %}">
+                                <i class="fas fa-tools me-2"></i>Admin Panel
+                            </a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="{% url 'users:logout' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:login' %}">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:register' %}">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-question-circle me-1"></i>Help
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="theme-toggle ms-2" onclick="toggleTheme()" title="Toggle theme">
+                            <i class="fas fa-moon" id="theme-icon"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content" class="flex-shrink-0" style="margin-top: 76px;">
+        <!-- Messages -->
+        {% if messages %}
+            <div class="container-fluid px-4 px-lg-5">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Futuristic Footer -->
+    <footer class="cyber-footer mt-auto">
+        <div class="footer-background">
+            <div class="footer-particles"></div>
+            <div class="footer-grid"></div>
+        </div>
+        
+        <div class="container">
+            <!-- Main Footer Content -->
+            <div class="row footer-main">
+                <div class="col-lg-4 mb-4">
+                    <div class="footer-brand">
+                        <h4 class="footer-title">
+                            <i class="fas fa-globe-americas me-2"></i>
+                            MOFA Task Tracker
+                        </h4>
+                        <p class="footer-description">
+                            Revolutionizing diplomatic workflow management with cutting-edge technology, 
+                            ensuring secure and efficient task coordination across all Ministry departments.
+                        </p>
+                        <div class="footer-social">
+                            <a href="#" class="social-link">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <div class="footer-section">
+                        <h6 class="footer-heading">Platform</h6>
+                        <ul class="footer-links">
+                            <li><a href="{% url 'tasks:dashboard' %}">Dashboard</a></li>
+                            <li><a href="{% url 'tasks:task_create' %}">Create Task</a></li>
+                            <li><a href="{% url 'tasks:task_list' %}">All Tasks</a></li>
+                            <li><a href="{% url 'tasks:report_request' %}">Reports</a></li>
+                            <li><a href="{% url 'tasks:task_export' %}">Export</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <div class="footer-section">
+                        <h6 class="footer-heading">Account</h6>
+                        <ul class="footer-links">
+                            <li><a href="{% url 'users:profile' %}">Profile</a></li>
+                            <li><a href="{% url 'users:profile_update' %}">Settings</a></li>
+                            <li><a href="{% url 'users:password_change' %}">Security</a></li>
+                            <li><a href="{% url 'users:logout' %}">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <div class="footer-section">
+                        <h6 class="footer-heading">Support</h6>
+                        <ul class="footer-links">
+                            <li><a href="{% url 'home:contact' %}">Contact Us</a></li>
+                            <li><a href="mailto:support@mofa.gov">Help Center</a></li>
+                            <li><a href="mailto:dpo@mofa.gov">Data Protection</a></li>
+                            <li><a href="#">Documentation</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <div class="footer-section">
+                        <h6 class="footer-heading">Legal</h6>
+                        <ul class="footer-links">
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                            <li><a href="#">Data Protection Act</a></li>
+                            <li><a href="#">GDPR Compliance</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security Badges -->
+            <div class="row footer-security">
+                <div class="col-12">
+                    <div class="security-badges">
+                        <div class="security-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>GDPR Compliant</span>
+                        </div>
+                        <div class="security-badge">
+                            <i class="fas fa-lock"></i>
+                            <span>256-bit SSL</span>
+                        </div>
+                        <div class="security-badge">
+                            <i class="fas fa-server"></i>
+                            <span>99.9% Uptime</span>
+                        </div>
+                        <div class="security-badge">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Data Protected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Bottom -->
+            <div class="row footer-bottom">
+                <div class="col-md-6">
+                    <p class="footer-copyright">
+                        &copy; {% now "Y" %} Ministry of Foreign Affairs. All rights reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="footer-version">
+                        <i class="fas fa-code me-1"></i>
+                        Version 2.0 | Built with Django & Bootstrap
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    <script>
+            // Theme toggle functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-bs-theme', newTheme);
+                            localStorage.setItem('theme', newTheme);
+                            
+            // Update icon
+            themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            const themeIcon = document.getElementById('theme-icon');
+            themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        });
+
+        // Auto-dismiss alerts
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // Add loading states to forms
+        // Form handling is now managed by main.js
+        
+        // Enhanced Navbar Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbar = document.querySelector('.navbar');
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+            
+            // Scroll-based navbar effects
+            let lastScrollTop = 0;
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                
+                lastScrollTop = scrollTop;
+            });
+            
+            // Enhanced mobile menu toggle
+            if (navbarToggler) {
+                navbarToggler.addEventListener('click', function() {
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    
+                    if (isExpanded) {
+                        // Closing menu
+                        navbarCollapse.style.animation = 'slideUp 0.3s ease-out forwards';
+                    } else {
+                        // Opening menu
+                        navbarCollapse.style.animation = 'slideDown 0.3s ease-out forwards';
+                    }
+                });
+            }
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (navbarCollapse.classList.contains('show') && 
+                    !navbar.contains(e.target)) {
+                    const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+                    bsCollapse.hide();
+                }
+            });
+            
+            // Enhanced dropdown interactions
+            const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+            dropdownToggles.forEach(toggle => {
+                // Click to toggle dropdown
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const dropdown = this.nextElementSibling;
+                    const isOpen = dropdown.classList.contains('show');
+                    
+                    // Close all other dropdowns
+                    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                        if (menu !== dropdown) {
+                            menu.classList.remove('show');
+                        }
+                    });
+                    
+                    // Toggle current dropdown
+                    if (isOpen) {
+                        dropdown.classList.remove('show');
+                    } else {
+                        dropdown.classList.add('show');
+                    }
+                });
+                
+                // Hover to show dropdown (desktop only)
+                if (window.innerWidth > 991) {
+                    toggle.addEventListener('mouseenter', function() {
+                        const dropdown = this.nextElementSibling;
+                        if (dropdown) {
+                            dropdown.classList.add('show');
+                        }
+                    });
+                    
+                    toggle.addEventListener('mouseleave', function() {
+                        const dropdown = this.nextElementSibling;
+                        if (dropdown) {
+                            setTimeout(() => {
+                                if (!dropdown.matches(':hover') && !this.matches(':hover')) {
+                                    dropdown.classList.remove('show');
+                                }
+                            }, 100);
+                        }
+                    });
+                }
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
+                }
+            });
+            
+            // Add ripple effect to nav links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple');
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+        
+        // Add CSS animations for mobile menu
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px) scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+            
+            @keyframes slideUp {
+                from {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateY(-20px) scale(0.95);
+                }
+            }
+            
+            .ripple {
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.3);
+                transform: scale(0);
+                animation: ripple-animation 0.6s linear;
+                pointer-events: none;
+            }
+            
+            @keyframes ripple-animation {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+</script>
+</body>
+</html>

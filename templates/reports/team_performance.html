@@ -1,0 +1,495 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Team Performance - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 py-4">
+<div class="reports-container">
+    <div class="reports-header">
+        <h1 class="reports-title">
+            <i class="fas fa-users me-3"></i>
+            Team Performance Dashboard
+        </h1>
+        <p class="reports-subtitle">
+            Track individual and team productivity metrics
+        </p>
+    </div>
+
+    <!-- Top Performers Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="cyber-chart-container">
+                <h5 class="chart-title">
+                    <i class="fas fa-trophy me-2"></i>
+                    Top Performers (Last 30 Days)
+                </h5>
+                <div class="row g-3">
+                    {% for performer in top_performers %}
+                    <div class="col-md-4">
+                        <div class="performer-card">
+                            <div class="performer-rank">#{{ forloop.counter }}</div>
+                            <div class="performer-info">
+                                <h6 class="performer-name">{{ performer.get_full_name|default:performer.username }}</h6>
+                                <div class="performer-stats">
+                                    <span class="stat-badge">{{ performer.recent_completed }} tasks completed</span>
+                                </div>
+                            </div>
+                            <div class="performer-icon">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No performance data available yet.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Performance Table -->
+    <div class="cyber-table-container">
+        <div class="table-header">
+            <h5 class="table-title">
+                <i class="fas fa-chart-bar me-2"></i>
+                Individual Performance Metrics
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table cyber-table">
+                <thead>
+                    <tr>
+                        <th>Team Member</th>
+                        <th>Total Tasks</th>
+                        <th>Completed</th>
+                        <th>Pending</th>
+                        <th>In Progress</th>
+                        <th>Overdue</th>
+                        <th>Completion Rate</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in user_stats %}
+                    <tr class="performance-row">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar me-3">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
+                                    <small class="text-muted">{{ user.email }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="stat-number">{{ user.total_tasks }}</span>
+                        </td>
+                        <td>
+                            <span class="stat-badge success">{{ user.completed_tasks }}</span>
+                        </td>
+                        <td>
+                            <span class="stat-badge warning">{{ user.pending_tasks }}</span>
+                        </td>
+                        <td>
+                            <span class="stat-badge info">{{ user.in_progress_tasks }}</span>
+                        </td>
+                        <td>
+                            <span class="stat-badge danger">{{ user.overdue_tasks }}</span>
+                        </td>
+                        <td>
+                            <div class="completion-rate">
+                                <div class="rate-circle">
+                                    <svg class="progress-ring" width="60" height="60">
+                                        <circle class="progress-ring-circle" 
+                                                stroke="var(--border-color)" 
+                                                stroke-width="4" 
+                                                fill="transparent" 
+                                                r="26" 
+                                                cx="30" 
+                                                cy="30"/>
+                                        <circle class="progress-ring-circle progress-ring-fill" 
+                                                stroke="var(--primary-color)" 
+                                                stroke-width="4" 
+                                                fill="transparent" 
+                                                r="26" 
+                                                cx="30" 
+                                                cy="30"
+                                                style="stroke-dasharray: 163.36; stroke-dashoffset: {% widthratio user.completion_rate 100 -163.36 %};"/>
+                                    </svg>
+                                    <div class="rate-text">{{ user.completion_rate }}%</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if user.completion_rate >= 80 %}
+                                <span class="performance-badge excellent">
+                                    <i class="fas fa-star me-1"></i>Excellent
+                                </span>
+                            {% elif user.completion_rate >= 60 %}
+                                <span class="performance-badge good">
+                                    <i class="fas fa-thumbs-up me-1"></i>Good
+                                </span>
+                            {% elif user.completion_rate >= 40 %}
+                                <span class="performance-badge average">
+                                    <i class="fas fa-chart-line me-1"></i>Average
+                                </span>
+                            {% else %}
+                                <span class="performance-badge poor">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Needs Improvement
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No team members with assigned tasks found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Performance Summary Cards -->
+    <div class="row g-4 mt-4">
+        <div class="col-md-4">
+            <div class="cyber-stat-card">
+                <div class="stat-icon text-success"><i class="fas fa-trophy"></i></div>
+                <div class="stat-value">{{ user_stats|length }}</div>
+                <div class="stat-label">Active Team Members</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="cyber-stat-card">
+                <div class="stat-icon text-primary"><i class="fas fa-chart-line"></i></div>
+                <div class="stat-value">
+                    {% if user_stats %}
+                        {% widthratio user_stats|length 1 1 as total_members %}
+                        {% for user in user_stats %}
+                            {% if forloop.first %}
+                                {{ user.completion_rate|floatformat:0 }}
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        0
+                    {% endif %}%
+                </div>
+                <div class="stat-label">Average Completion Rate</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="cyber-stat-card">
+                <div class="stat-icon text-warning"><i class="fas fa-clock"></i></div>
+                <div class="stat-value">
+                    {% for user in user_stats %}
+                        {% if forloop.first %}
+                            {{ user.total_tasks }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="stat-label">Total Assigned Tasks</div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.reports-container {
+    position: relative;
+    padding: 2rem;
+    background: var(--bg-surface);
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.reports-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.reports-header {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.reports-title {
+    color: var(--text-primary);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.reports-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.cyber-chart-container {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.cyber-table-container {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+}
+
+.chart-title, .table-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+}
+
+.performer-card {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(139, 92, 246, 0.1));
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.performer-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.performer-rank {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.performer-name {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.performer-stats {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.stat-badge {
+    background: rgba(0, 212, 255, 0.2);
+    color: var(--primary-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.stat-badge.success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.stat-badge.warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.stat-badge.info {
+    background: rgba(6, 182, 212, 0.2);
+    color: #06b6d4;
+}
+
+.stat-badge.danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.performer-icon {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-left: auto;
+}
+
+.cyber-table {
+    color: var(--text-primary);
+    margin-bottom: 0;
+}
+
+.cyber-table th {
+    background: rgba(0, 212, 255, 0.1);
+    color: var(--text-primary);
+    border: none;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.cyber-table td {
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.cyber-table tbody tr:hover {
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.stat-number {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.completion-rate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rate-circle {
+    position: relative;
+    display: inline-block;
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+    transition: stroke-dashoffset 0.5s ease-in-out;
+}
+
+.rate-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.performance-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.performance-badge.excellent {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.performance-badge.good {
+    background: rgba(6, 182, 212, 0.2);
+    color: #06b6d4;
+}
+
+.performance-badge.average {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.performance-badge.poor {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.cyber-stat-card {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.cyber-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+}
+</style>
+{% endblock %}

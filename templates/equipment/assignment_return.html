@@ -1,0 +1,43 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Return Device - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-header bg-transparent border-0">
+                    <h4 class="text-white mb-0">
+                        <i class="fas fa-undo me-2"></i>Return Device
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-white">Are you sure you want to return this device?</p>
+                    <div class="alert alert-info">
+                        <strong>{{ object.equipment }}</strong><br>
+                        <small>
+                            Directorate: {{ object.directorate }}<br>
+                            Assigned To: {{ object.assigned_to.get_full_name|default:object.assigned_to.username }}<br>
+                            Room: {{ object.room_number|default:"N/A" }}
+                        </small>
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-undo me-2"></i>Yes, Return Device
+                            </button>
+                            <a href="{% url 'equipment:assignment_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

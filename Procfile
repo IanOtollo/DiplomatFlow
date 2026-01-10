@@ -1,0 +1,1 @@
+web: python -m pip install --upgrade pip && pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 300 mofa_task_tracker.wsgi:application

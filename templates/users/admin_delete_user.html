@@ -1,0 +1,324 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Delete User - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1 class="admin-title">
+            <i class="fas fa-user-times me-3"></i>
+            Delete User: {{ user.username }}
+        </h1>
+        <p class="admin-subtitle">
+            Permanently remove this user from the system
+        </p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="cyber-chart-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="chart-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Confirm Deletion
+                    </h5>
+                    <a href="{% url 'users:admin_user_management' %}" class="btn cyber-btn-outline">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Users
+                    </a>
+                </div>
+
+                <div class="user-info mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar me-3">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
+                            <small class="text-muted">{{ user.email }}</small>
+                            <br>
+                            <small class="text-muted">@{{ user.username }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <div class="warning-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="warning-content">
+                        <h6 class="warning-title">Warning: This action cannot be undone!</h6>
+                        <p class="warning-text">
+                            You are about to permanently delete the user <strong>{{ user.username }}</strong> 
+                            from the system. This will remove all associated data including:
+                        </p>
+                        <ul class="warning-list">
+                            <li>User account and profile information</li>
+                            <li>All tasks created by this user</li>
+                            <li>All tasks assigned to this user</li>
+                            <li>All comments and attachments</li>
+                            <li>All activity history</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <form method="post" class="delete-form">
+                    {% csrf_token %}
+                    <div class="form-group mb-4">
+                        <label for="confirm_username" class="form-label">
+                            Type the username to confirm deletion
+                        </label>
+                        <input type="text" class="form-control" id="confirm_username" name="confirm_username" 
+                               placeholder="Enter '{{ user.username }}' to confirm" required>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-danger" id="delete-btn" disabled>
+                            <i class="fas fa-trash me-2"></i>Delete User Permanently
+                        </button>
+                        <a href="{% url 'users:admin_user_management' %}" class="btn cyber-btn-outline">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmInput = document.getElementById('confirm_username');
+    const deleteBtn = document.getElementById('delete-btn');
+    const expectedUsername = '{{ user.username }}';
+
+    confirmInput.addEventListener('input', function() {
+        if (this.value === expectedUsername) {
+            deleteBtn.disabled = false;
+            deleteBtn.classList.remove('btn-danger');
+            deleteBtn.classList.add('btn-danger');
+        } else {
+            deleteBtn.disabled = true;
+        }
+    });
+
+    // Add confirmation dialog
+    deleteBtn.addEventListener('click', function(e) {
+        if (!confirm('Are you absolutely sure you want to delete this user? This action cannot be undone!')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-container {
+    position: relative;
+    padding: 2rem;
+    background: var(--bg-surface);
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.admin-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.admin-header {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-title {
+    color: var(--text-primary);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.admin-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.cyber-chart-container {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+}
+
+.user-info {
+    background: rgba(0, 212, 255, 0.05);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.warning-box {
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.warning-icon {
+    color: #ef4444;
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.warning-content {
+    flex: 1;
+}
+
+.warning-title {
+    color: #ef4444;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.warning-text {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.warning-list {
+    color: var(--text-primary);
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.warning-list li {
+    margin-bottom: 0.25rem;
+}
+
+.delete-form .form-label {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.delete-form .form-control {
+    background: var(--bg-glass);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    transition: var(--transition);
+    backdrop-filter: var(--backdrop-blur-sm);
+    -webkit-backdrop-filter: var(--backdrop-blur-sm);
+}
+
+.delete-form .form-control:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25);
+    background: var(--bg-card);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border: none;
+    border-radius: 16px;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.875rem;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.cyber-btn-outline {
+    border-radius: 16px;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.875rem;
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.cyber-btn-outline:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

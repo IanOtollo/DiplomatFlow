@@ -1,0 +1,257 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if task %}Edit Task{% else %}Create Task{% endif %} - MOFA Task Tracker
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent border-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        {% if task %}
+                            <i class="fas fa-edit me-2"></i>Edit Task
+                        {% else %}
+                            <i class="fas fa-plus me-2"></i>Create New Task
+                        {% endif %}
+                    </h4>
+                    <a href="{% url 'tasks:task_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Tasks
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Task Title *</label>
+                            {{ form.title|add_class:"form-control" }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.title.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description *</label>
+                            {{ form.description|add_class:"form-control" }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">Category *</label>
+                            {{ form.category|add_class:"form-select" }}
+                            {% if form.category.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.category.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.priority.id_for_label }}" class="form-label">Priority *</label>
+                            {{ form.priority|add_class:"form-select" }}
+                            {% if form.priority.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.priority.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.assigned_to.id_for_label }}" class="form-label">Assigned To</label>
+                            {{ form.assigned_to|add_class:"form-select" }}
+                            {% if form.assigned_to.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.assigned_to.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.reported_by.id_for_label }}" class="form-label">Reported By</label>
+                            {{ form.reported_by|add_class:"form-select" }}
+                            {% if form.reported_by.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.reported_by.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.due_date.id_for_label }}" class="form-label">Due Date</label>
+                            {{ form.due_date|add_class:"form-control" }}
+                            {% if form.due_date.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.due_date.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.room_number.id_for_label }}" class="form-label">Room Number</label>
+                            {{ form.room_number|add_class:"form-control" }}
+                            {% if form.room_number.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.room_number.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.estimated_minutes.id_for_label }}" class="form-label">Estimated Minutes</label>
+                            {{ form.estimated_minutes|add_class:"form-control" }}
+                            {% if form.estimated_minutes.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.estimated_minutes.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-check mt-4">
+                                {{ form.is_urgent|add_class:"form-check-input" }}
+                                <label for="{{ form.is_urgent.id_for_label }}" class="form-check-label">
+                                    <i class="fas fa-fire me-1 text-danger"></i>Urgent Task
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-check mt-4">
+                                {{ form.requires_approval|add_class:"form-check-input" }}
+                                <label for="{{ form.requires_approval.id_for_label }}" class="form-check-label">
+                                    <i class="fas fa-check-circle me-1 text-warning"></i>Requires Approval
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-check mt-4">
+                                {{ form.is_public|add_class:"form-check-input" }}
+                                <label for="{{ form.is_public.id_for_label }}" class="form-check-label">
+                                    <i class="fas fa-globe me-1 text-info"></i>Public Task
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'tasks:task_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>
+                            {% if task %}Update Task{% else %}Create Task{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.querySelector('form');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function(e) {
+        // Basic client-side validation
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+        }
+    });
+    
+    // Real-time validation
+    const requiredFields = form.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+    
+    // Auto-save draft (optional)
+    const autoSaveFields = form.querySelectorAll('input, textarea, select');
+    autoSaveFields.forEach(field => {
+        field.addEventListener('change', function() {
+            // Save to localStorage as draft
+            const formData = new FormData(form);
+            const draft = {};
+            for (let [key, value] of formData.entries()) {
+                draft[key] = value;
+            }
+            localStorage.setItem('task_draft', JSON.stringify(draft));
+        });
+    });
+    
+    // Load draft on page load
+    const draft = localStorage.getItem('task_draft');
+    if (draft && !form.querySelector('input[name="title"]').value) {
+        const draftData = JSON.parse(draft);
+        Object.keys(draftData).forEach(key => {
+            const field = form.querySelector(`[name="${key}"]`);
+            if (field) {
+                field.value = draftData[key];
+            }
+        });
+    }
+    
+    // Clear draft on successful submit
+    form.addEventListener('submit', function() {
+        localStorage.removeItem('task_draft');
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Resolve Issue - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-header bg-transparent border-0">
+                    <h4 class="text-white mb-0">
+                        <i class="fas fa-check me-2"></i>Resolve Issue: {{ issue.title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <strong>Equipment:</strong> {{ issue.equipment }}<br>
+                        <strong>Reported By:</strong> {{ issue.reported_by.get_full_name|default:issue.reported_by.username }}<br>
+                        <strong>Reported At:</strong> {{ issue.reported_at|date:"F d, Y H:i" }}
+                    </div>
+                    {% crispy form %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

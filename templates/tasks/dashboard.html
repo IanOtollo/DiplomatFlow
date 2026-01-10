@@ -1,0 +1,714 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - MOFA Task Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cyber-dashboard {
+        background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        min-height: 100vh;
+        position: relative;
+    }
+    
+    .cyber-dashboard::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
+    }
+    
+    .dashboard-header {
+        background: var(--bg-card);
+        backdrop-filter: var(--backdrop-blur);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+            rgba(0, 212, 255, 0.1) 0%, 
+            rgba(139, 92, 246, 0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .dashboard-header:hover::before {
+        opacity: 1;
+    }
+    
+    .dashboard-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+    
+    .cyber-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    .cyber-stat-card {
+        background: var(--bg-card);
+        backdrop-filter: var(--backdrop-blur);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .cyber-stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+            rgba(0, 212, 255, 0.05) 0%, 
+            rgba(139, 92, 246, 0.05) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .cyber-stat-card:hover::before {
+        opacity: 1;
+    }
+    
+    .cyber-stat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: var(--shadow-neon);
+        border-color: var(--primary-color);
+    }
+    
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        animation: pulse 2s infinite;
+    }
+    
+    .stat-icon.primary { color: var(--primary-color); }
+    .stat-icon.warning { color: var(--warning-color); }
+    .stat-icon.info { color: var(--accent-color); }
+    .stat-icon.success { color: var(--accent-color); }
+    .stat-icon.danger { color: var(--danger-color); }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        animation: pulse 2s infinite;
+    }
+    
+    .stat-label {
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+    
+    .cyber-chart-container {
+        background: var(--bg-card);
+        backdrop-filter: var(--backdrop-blur);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .cyber-chart-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+            rgba(0, 212, 255, 0.03) 0%, 
+            rgba(139, 92, 246, 0.03) 100%);
+    }
+    
+    .chart-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    
+    .cyber-table-container {
+        background: var(--bg-card);
+        backdrop-filter: var(--backdrop-blur);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .cyber-table-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+            rgba(0, 212, 255, 0.02) 0%, 
+            rgba(139, 92, 246, 0.02) 100%);
+    }
+    
+    .table-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+    
+    .table-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .cyber-table {
+        background: transparent;
+        margin: 0;
+    }
+    
+    .cyber-table thead th {
+        background: rgba(0, 212, 255, 0.1);
+        color: var(--text-primary);
+        border: none;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.85rem;
+    }
+    
+    .cyber-table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+    
+    .cyber-table tbody tr:hover {
+        background: rgba(0, 212, 255, 0.05);
+        transform: scale(1.01);
+    }
+    
+    .cyber-table tbody td {
+        padding: 1rem 1.5rem;
+        border: none;
+        vertical-align: middle;
+    }
+    
+    .task-link {
+        color: var(--text-primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .task-link:hover {
+        color: var(--primary-color);
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+    
+    .cyber-badge {
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .cyber-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .cyber-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .cyber-btn:hover::before {
+        left: 100%;
+    }
+    
+    .cyber-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-neon);
+    }
+    
+    .cyber-btn-outline {
+        background: transparent;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+    }
+    
+    .cyber-btn-outline:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+    
+    .progress-ring {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1rem;
+    }
+    
+    .progress-ring circle {
+        fill: none;
+        stroke-width: 8;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+    }
+    
+    .progress-ring .background {
+        stroke: rgba(0, 212, 255, 0.1);
+    }
+    
+    .progress-ring .progress {
+        stroke: var(--primary-color);
+        stroke-dasharray: 314;
+        stroke-dashoffset: 314;
+        animation: progressAnimation 2s ease-in-out;
+    }
+    
+    @keyframes progressAnimation {
+        from { stroke-dashoffset: 314; }
+        to { stroke-dashoffset: var(--progress-offset); }
+    }
+    
+    .floating-action-btn {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: var(--shadow-xl);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .floating-action-btn:hover {
+        transform: scale(1.1);
+        box-shadow: var(--shadow-neon);
+    }
+    
+    @media (max-width: 768px) {
+        .cyber-stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-title {
+            font-size: 2rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .cyber-table-container {
+            overflow-x: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cyber-dashboard">
+    <div class="container-fluid px-4 px-lg-5 py-4">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="dashboard-title">
+                        <i class="fas fa-tachometer-alt me-3"></i>
+                        Command Center
+                    </h1>
+                    <p class="dashboard-subtitle">
+                        Welcome back, {{ user.get_full_name|default:user.username }}! 
+                        Monitor your diplomatic operations and track progress in real-time.
+                    </p>
+            </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="d-flex gap-2 justify-content-md-end">
+                        <a href="{% url 'tasks:task_create' %}" class="btn cyber-btn text-white">
+                            <i class="fas fa-plus me-2"></i>New Task
+                        </a>
+                        <a href="{% url 'tasks:task_list' %}" class="btn cyber-btn cyber-btn-outline">
+                            <i class="fas fa-list me-2"></i>All Tasks
+                </a>
+            </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="cyber-stats-grid">
+            <div class="cyber-stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-number">{{ total_tasks|default:"0" }}</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            
+            <div class="cyber-stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-number">{{ pending_tasks|default:"0" }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            
+            <div class="cyber-stat-card">
+                <div class="stat-icon info">
+                    <i class="fas fa-spinner"></i>
+        </div>
+                <div class="stat-number">{{ in_progress_tasks|default:"0" }}</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            
+            <div class="cyber-stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-number">{{ completed_tasks|default:"0" }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            
+            <div class="cyber-stat-card">
+                <div class="stat-icon danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+        </div>
+                <div class="stat-number">{{ overdue_tasks|default:"0" }}</div>
+                <div class="stat-label">Overdue</div>
+            </div>
+            
+            <div class="cyber-stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="stat-number">{{ urgent_tasks|default:"0" }}</div>
+                <div class="stat-label">Urgent</div>
+        </div>
+    </div>
+
+        <!-- Progress Visualization -->
+        <div class="cyber-chart-container">
+            <h3 class="chart-title">Task Completion Progress</h3>
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <div class="progress-ring">
+                        <svg width="120" height="120">
+                            <circle class="background" cx="60" cy="60" r="50"></circle>
+                            <circle class="progress" cx="60" cy="60" r="50" 
+                                    style="--progress-offset: {{ completion_percentage|default:0|floatformat:0 }}px;"></circle>
+                        </svg>
+                    </div>
+                    <h4 class="mt-3">{{ completion_percentage|default:0|floatformat:0 }}%</h4>
+                    <p class="text-muted">Completion Rate</p>
+                </div>
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Completed</span>
+                                <span class="fw-bold">{{ completed_tasks|default:"0" }}</span>
+                            </div>
+                            <div class="progress mt-1" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: {{ completed_percentage|default:0|floatformat:0 }}%"></div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>In Progress</span>
+                                <span class="fw-bold">{{ in_progress_tasks|default:"0" }}</span>
+                            </div>
+                            <div class="progress mt-1" style="height: 8px;">
+                                <div class="progress-bar bg-info" style="width: {{ in_progress_percentage|default:0|floatformat:0 }}%"></div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Pending</span>
+                                <span class="fw-bold">{{ pending_tasks|default:"0" }}</span>
+                            </div>
+                            <div class="progress mt-1" style="height: 8px;">
+                                <div class="progress-bar bg-warning" style="width: {{ pending_percentage|default:0|floatformat:0 }}%"></div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Overdue</span>
+                                <span class="fw-bold">{{ overdue_tasks|default:"0" }}</span>
+                            </div>
+                            <div class="progress mt-1" style="height: 8px;">
+                                <div class="progress-bar bg-danger" style="width: {{ overdue_percentage|default:0|floatformat:0 }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Time Tracking Statistics -->
+        <div class="cyber-chart-container">
+            <h3 class="chart-title">Time Tracking Analytics</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="cyber-stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-number">{{ avg_estimated_hours|default:"0" }}h</div>
+                        <div class="stat-label">Avg Estimated Time</div>
+                        <small class="text-muted">{{ total_estimated_minutes|default:"0" }} minutes total</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="cyber-stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-stopwatch"></i>
+                        </div>
+                        <div class="stat-number">{{ avg_actual_hours|default:"0" }}h</div>
+                        <div class="stat-label">Avg Actual Time</div>
+                        <small class="text-muted">{{ total_actual_minutes|default:"0" }} minutes total</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Tasks Table -->
+        <div class="cyber-table-container">
+            <div class="table-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="table-title">
+                        <i class="fas fa-list me-2"></i>Recent Activity
+                    </h3>
+                    <a href="{% url 'tasks:task_list' %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-external-link-alt me-1"></i>View All
+                    </a>
+                </div>
+            </div>
+            
+                {% if recent_tasks %}
+                <div class="table-responsive">
+                    <table class="table cyber-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-tasks me-1"></i>Task</th>
+                                <th><i class="fas fa-flag me-1"></i>Status</th>
+                                <th><i class="fas fa-exclamation-circle me-1"></i>Priority</th>
+                                <th><i class="fas fa-user me-1"></i>Assigned To</th>
+                                <th><i class="fas fa-calendar me-1"></i>Due Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for task in recent_tasks %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <i class="fas fa-tasks text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">
+                                                <a href="{% url 'tasks:task_detail' task.pk %}" class="task-link">
+                                                    {{ task.title|truncatechars:40 }}
+                                                </a>
+                                            </h6>
+                                            <small class="text-muted">{{ task.category|title }}</small>
+                                        </div>
+                                </div>
+                                </td>
+                                <td>
+                                    <span class="cyber-badge bg-{{ task.status|default:'secondary' }}">
+                                        {{ task.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="cyber-badge bg-{{ task.priority|default:'secondary' }}">
+                                        {{ task.get_priority_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if task.assigned_to %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-2">
+                                                <i class="fas fa-user-circle text-primary"></i>
+                                </div>
+                                            <span>{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+                            </div>
+                                {% else %}
+                                        <span class="text-muted">Unassigned</span>
+                                {% endif %}
+                                </td>
+                                <td>
+                                    {% if task.due_date %}
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                            <span>{{ task.due_date|date:"M d, Y" }}</span>
+                    </div>
+                {% else %}
+                                        <span class="text-muted">No due date</span>
+                {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h4>No Tasks Found</h4>
+                    <p class="mb-4">Get started by creating your first task to begin managing your diplomatic operations.</p>
+                    <a href="{% url 'tasks:task_create' %}" class="btn cyber-btn text-white">
+                        <i class="fas fa-plus me-2"></i>Create Your First Task
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Floating Action Button -->
+<a href="{% url 'tasks:task_create' %}" class="floating-action-btn" title="Create New Task">
+    <i class="fas fa-plus"></i>
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Animate progress rings
+    const progressRings = document.querySelectorAll('.progress-ring .progress');
+    progressRings.forEach(ring => {
+        const offset = ring.style.getPropertyValue('--progress-offset');
+        if (offset) {
+            // Calculate the actual offset based on percentage
+            const percentage = parseFloat(offset.replace('px', ''));
+            const circumference = 2 * Math.PI * 50; // radius = 50
+            const strokeDashoffset = circumference - (percentage / 100) * circumference;
+            ring.style.strokeDashoffset = strokeDashoffset;
+        }
+    });
+    
+    // Add hover effects to stat cards
+    const statCards = document.querySelectorAll('.cyber-stat-card');
+    statCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px) scale(1.02)';
+            this.style.boxShadow = '0 20px 40px rgba(0, 212, 255, 0.3), 0 0 60px rgba(0, 212, 255, 0.1)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Add click effects to buttons
+    const buttons = document.querySelectorAll('.cyber-btn');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+        });
+    });
+</script>
+{% endblock %}

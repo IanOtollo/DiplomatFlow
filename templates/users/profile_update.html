@@ -1,0 +1,1039 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+
+{% block title %}Update Profile - MOFA Task Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-update-container {
+        background: linear-gradient(135deg, 
+            #0f0f23 0%, 
+            #1a1a2e 25%, 
+            #16213e 50%, 
+            #0f3460 75%, 
+            #533483 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-update-container::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 40% 60%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .cyber-grid {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        pointer-events: none;
+        z-index: -1;
+        animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(50px, 50px); }
+    }
+    
+    .glass-card {
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 212, 255, 0.2);
+        border-radius: 24px;
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(0, 212, 255, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(0, 212, 255, 0.1), 
+            transparent);
+        transition: left 0.6s;
+    }
+
+    .glass-card:hover::before {
+        left: 100%;
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 
+            0 25px 50px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(0, 212, 255, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        border-color: rgba(0, 212, 255, 0.4);
+    }
+    
+    .profile-header {
+        background: linear-gradient(135deg, 
+            rgba(99, 102, 241, 0.9) 0%, 
+            rgba(139, 92, 246, 0.9) 25%,
+            rgba(16, 185, 129, 0.9) 50%,
+            rgba(245, 158, 11, 0.9) 75%,
+            rgba(239, 68, 68, 0.9) 100%);
+        color: white;
+        border-radius: 24px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 
+            0 25px 50px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(255, 255, 255, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+        animation: gradientShift 8s ease-in-out infinite;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .profile-header::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(0, 212, 255, 0.2) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+    
+    .form-control {
+        background: rgba(15, 23, 42, 0.8);
+        border: 2px solid rgba(0, 212, 255, 0.3);
+        border-radius: 16px;
+        padding: 14px 18px;
+        font-size: 16px;
+        color: #f1f5f9;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .form-control::placeholder {
+        color: rgba(241, 245, 249, 0.6);
+    }
+    
+    .form-control:focus {
+        background: rgba(15, 23, 42, 0.9);
+        border-color: #00d4ff;
+        box-shadow: 
+            0 0 0 0.2rem rgba(0, 212, 255, 0.25),
+            0 0 20px rgba(0, 212, 255, 0.3);
+        transform: scale(1.02);
+    }
+
+    .form-select {
+        background: rgba(15, 23, 42, 0.8);
+        border: 2px solid rgba(0, 212, 255, 0.3);
+        border-radius: 16px;
+        padding: 14px 18px;
+        font-size: 16px;
+        color: #f1f5f9;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .form-select:focus {
+        background: rgba(15, 23, 42, 0.9);
+        border-color: #00d4ff;
+        box-shadow: 
+            0 0 0 0.2rem rgba(0, 212, 255, 0.25),
+            0 0 20px rgba(0, 212, 255, 0.3);
+        transform: scale(1.02);
+    }
+
+    .form-label {
+        color: #00d4ff !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.95rem;
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        display: block !important;
+        opacity: 1 !important;
+    }
+
+    .form-label i {
+        color: #8b5cf6 !important;
+        margin-right: 0.5rem;
+        animation: pulse 2s infinite;
+        text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, 
+            #00d4ff 0%, 
+            #8b5cf6 50%, 
+            #10b981 100%);
+        border: none;
+        border-radius: 16px;
+        padding: 14px 28px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 
+            0 8px 25px rgba(0, 212, 255, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
+        color: white !important;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.3), 
+            transparent);
+        transition: left 0.6s;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 
+            0 15px 35px rgba(0, 212, 255, 0.4),
+            0 0 0 1px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-outline-secondary {
+        background: rgba(15, 23, 42, 0.8);
+        border: 2px solid rgba(100, 116, 139, 0.5);
+        color: #cbd5e1 !important;
+        border-radius: 16px;
+        padding: 14px 28px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        text-shadow: 0 0 5px rgba(203, 213, 225, 0.3);
+    }
+
+    .btn-outline-secondary:hover {
+        background: rgba(100, 116, 139, 0.2);
+        border-color: #64748b;
+        color: white;
+        transform: translateY(-2px) scale(1.02);
+    }
+
+    .btn-outline-warning {
+        background: rgba(15, 23, 42, 0.8);
+        border: 2px solid rgba(245, 158, 11, 0.5);
+        color: #f59e0b !important;
+        border-radius: 16px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        text-shadow: 0 0 5px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-outline-warning:hover {
+        background: rgba(245, 158, 11, 0.2);
+        border-color: #f59e0b;
+        color: white;
+        transform: translateY(-2px) scale(1.02);
+    }
+
+    .btn-outline-info {
+        background: rgba(15, 23, 42, 0.8);
+        border: 2px solid rgba(6, 182, 212, 0.5);
+        color: #06b6d4 !important;
+        border-radius: 16px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        text-shadow: 0 0 5px rgba(6, 182, 212, 0.3);
+    }
+
+    .btn-outline-info:hover {
+        background: rgba(6, 182, 212, 0.2);
+        border-color: #06b6d4;
+        color: white;
+        transform: translateY(-2px) scale(1.02);
+    }
+
+    .btn-outline-primary {
+        background: rgba(15, 23, 42, 0.8);
+        border: 2px solid rgba(99, 102, 241, 0.5);
+        color: #6366f1 !important;
+        border-radius: 16px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        text-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-outline-primary:hover {
+        background: rgba(99, 102, 241, 0.2);
+        border-color: #6366f1;
+        color: white;
+        transform: translateY(-2px) scale(1.02);
+    }
+    
+    .profile-avatar {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, 
+            #00d4ff 0%, 
+            #8b5cf6 50%, 
+            #10b981 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3.5rem;
+        font-weight: 900;
+        margin: 0 auto 1rem;
+        box-shadow: 
+            0 20px 40px rgba(0, 212, 255, 0.3),
+            0 0 0 4px rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+        animation: pulse 3s infinite;
+    }
+
+    .profile-avatar::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(from 0deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.3), 
+            transparent, 
+            rgba(255, 255, 255, 0.1), 
+            transparent);
+        animation: rotate 4s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .section-title {
+        background: linear-gradient(135deg, 
+            #00d4ff 0%, 
+            #8b5cf6 50%, 
+            #10b981 100%);
+        color: #ffffff !important;
+        font-weight: 900 !important;
+        margin-bottom: 1.5rem;
+        padding: 1.2rem 2rem;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 1.3rem;
+        text-shadow: 
+            0 0 5px rgba(0, 0, 0, 0.8),
+            0 2px 4px rgba(0, 0, 0, 0.6),
+            0 0 20px rgba(255, 255, 255, 0.5);
+        display: block !important;
+        opacity: 1 !important;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 
+            0 10px 30px rgba(0, 212, 255, 0.4),
+            0 0 0 3px rgba(255, 255, 255, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        border: 3px solid rgba(255, 255, 255, 0.4);
+        font-family: 'Arial', sans-serif;
+        line-height: 1.2;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    .section-title::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.2), 
+            transparent);
+        transition: left 0.6s;
+    }
+
+    .section-title:hover::before {
+        left: 100%;
+    }
+
+    .section-title i {
+        color: #ffffff !important;
+        margin-right: 1rem;
+        animation: pulse 2s infinite;
+        text-shadow: 
+            0 0 5px rgba(0, 0, 0, 0.8),
+            0 2px 4px rgba(0, 0, 0, 0.6),
+            0 0 15px rgba(255, 255, 255, 0.7);
+        font-size: 1.2em;
+        font-weight: 900;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    .profile-info h6 {
+        color: #00d4ff !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        margin-bottom: 0.5rem !important;
+        display: block !important;
+        opacity: 1 !important;
+    }
+
+    .profile-info p {
+        color: #f1f5f9 !important;
+        font-weight: 600 !important;
+        font-size: 1.1rem;
+        text-shadow: 0 0 5px rgba(241, 245, 249, 0.3);
+        margin-bottom: 1rem !important;
+        display: block !important;
+        opacity: 1 !important;
+    }
+
+    .badge {
+        background: rgba(0, 212, 255, 0.2);
+        color: #00d4ff !important;
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 12px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        display: inline-block !important;
+        opacity: 1 !important;
+    }
+
+    .btn-light {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white !important;
+        border-radius: 16px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-light:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+        transform: translateY(-2px) scale(1.02);
+    }
+
+    .text-danger {
+        color: #ef4444 !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        display: block !important;
+        opacity: 1 !important;
+    }
+
+    .text-muted {
+        color: #cbd5e1 !important;
+        font-weight: 500 !important;
+        text-shadow: 0 0 5px rgba(203, 213, 225, 0.3);
+        display: block !important;
+        opacity: 1 !important;
+    }
+
+    /* Ensure all text is visible */
+    h1, h2, h3, h4, h5, h6 {
+        color: white !important;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        opacity: 1 !important;
+    }
+
+    p, span, div {
+        color: #f1f5f9 !important;
+        opacity: 1 !important;
+    }
+
+    .lead {
+        color: #e2e8f0 !important;
+        font-weight: 500 !important;
+        text-shadow: 0 0 5px rgba(226, 232, 240, 0.3);
+        opacity: 1 !important;
+    }
+
+    .display-5 {
+        color: white !important;
+        font-weight: 800 !important;
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        opacity: 1 !important;
+    }
+
+    /* Floating particles */
+    .floating-particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #00d4ff;
+        border-radius: 50%;
+        animation: floatAround 8s infinite linear;
+        opacity: 0.6;
+    }
+
+    @keyframes floatAround {
+        0% {
+            transform: translateY(100vh) translateX(0) rotate(0deg);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.6;
+        }
+        90% {
+            opacity: 0.6;
+        }
+        100% {
+            transform: translateY(-100px) translateX(100px) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    /* Ensure crisp text rendering */
+    .section-title {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-smooth: always;
+        -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .profile-header {
+            padding: 1.5rem;
+        }
+        
+        .glass-card {
+            padding: 1.5rem;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            font-size: 2.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            padding: 1rem 1.5rem;
+            letter-spacing: 1px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-update-container">
+    <!-- Cyber Grid Background -->
+    <div class="cyber-grid"></div>
+    
+    <!-- Floating Particles -->
+    <div class="floating-particles" id="particles"></div>
+    
+    <div class="container-fluid px-4 px-lg-5">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center mb-3">
+                        <a href="{% url 'users:profile' %}" class="btn btn-light me-3">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                        </a>
+                        <span class="badge bg-light text-dark">
+                            <i class="fas fa-user-edit me-1"></i>Update Profile
+                        </span>
+                    </div>
+                    <h1 class="display-5 fw-bold mb-3">Update Your Profile</h1>
+                    <p class="lead mb-0">Keep your information up to date</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="profile-avatar">
+                        {{ user.first_name|first }}{{ user.last_name|first }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Form -->
+            <div class="col-lg-8">
+                <div class="glass-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-user-edit me-2"></i>Personal Information
+                    </h3>
+                    
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                    <i class="fas fa-user me-2"></i>First Name
+                                </label>
+                                {{ form.first_name|add_class:"form-control" }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.first_name.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                    <i class="fas fa-user me-2"></i>Last Name
+                                </label>
+                                {{ form.last_name|add_class:"form-control" }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.last_name.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    <i class="fas fa-envelope me-2"></i>Email Address
+                                </label>
+                                {{ form.email|add_class:"form-control" }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.email.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                                    <i class="fas fa-phone me-2"></i>Phone Number
+                                </label>
+                                {{ form.phone_number|add_class:"form-control" }}
+                                {% if form.phone_number.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.phone_number.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.department.id_for_label }}" class="form-label">
+                                    <i class="fas fa-building me-2"></i>Department
+                                </label>
+                                {{ form.department|add_class:"form-select" }}
+                                {% if form.department.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.department.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.position.id_for_label }}" class="form-label">
+                                    <i class="fas fa-briefcase me-2"></i>Position
+                                </label>
+                                {{ form.position|add_class:"form-select" }}
+                                {% if form.position.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.position.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.room_number.id_for_label }}" class="form-label">
+                                    <i class="fas fa-door-open me-2"></i>Room Number
+                                </label>
+                                {{ form.room_number|add_class:"form-control" }}
+                                {% if form.room_number.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.room_number.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.profile_picture.id_for_label }}" class="form-label">
+                                    <i class="fas fa-camera me-2"></i>Profile Picture
+                                </label>
+                                {{ form.profile_picture|add_class:"form-control" }}
+                                {% if form.profile_picture.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.profile_picture.errors %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-3 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Update Profile
+                            </button>
+                            <a href="{% url 'users:profile' %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Current Profile Info -->
+                <div class="glass-card">
+                    <h4 class="section-title">
+                        <i class="fas fa-info-circle me-2"></i>Current Profile
+                    </h4>
+                    <div class="profile-info">
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-muted mb-1">Full Name</h6>
+                            <p class="mb-0">{{ user.get_full_name }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-muted mb-1">Email</h6>
+                            <p class="mb-0">{{ user.email }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-muted mb-1">Department</h6>
+                            <p class="mb-0">{{ user.get_department_display }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-muted mb-1">Position</h6>
+                            <p class="mb-0">{{ user.get_position_display }}</p>
+                        </div>
+                        {% if user.phone_number %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-muted mb-1">Phone</h6>
+                            <p class="mb-0">{{ user.phone_number }}</p>
+                        </div>
+                        {% endif %}
+                        {% if user.room_number %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-muted mb-1">Room</h6>
+                            <p class="mb-0">{{ user.room_number }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="glass-card">
+                    <h4 class="section-title">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h4>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'users:password_change' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-key me-2"></i>Change Password
+                        </a>
+                        <a href="{% url 'users:profile' %}" class="btn btn-outline-info">
+                            <i class="fas fa-user me-2"></i>View Profile
+                        </a>
+                        <a href="{% url 'tasks:dashboard' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add form validation
+    const form = document.querySelector('.needs-validation');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    }
+    
+    // Add smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Create floating particles
+    function createParticles() {
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 50;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Random position and animation delay
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+            
+            // Random size
+            const size = Math.random() * 4 + 2;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            
+            // Random color
+            const colors = ['#00d4ff', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
+            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+            
+            particlesContainer.appendChild(particle);
+        }
+    }
+
+    // Initialize particles
+    createParticles();
+
+    // Add interactive form field effects
+    const formControls = document.querySelectorAll('.form-control, .form-select');
+    formControls.forEach(control => {
+        control.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'translateY(-2px)';
+            this.parentElement.style.transition = 'transform 0.3s ease';
+        });
+        
+        control.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Add button click effects
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Add typing effect to form labels
+    const labels = document.querySelectorAll('.form-label');
+    labels.forEach((label, index) => {
+        const text = label.textContent;
+        label.textContent = '';
+        
+        setTimeout(() => {
+            let i = 0;
+            const typeInterval = setInterval(() => {
+                if (i < text.length) {
+                    label.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typeInterval);
+                }
+            }, 50);
+        }, index * 100);
+    });
+
+    // Add scroll-based animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe glass cards
+    const glassCards = document.querySelectorAll('.glass-card');
+    glassCards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+
+    // Add glow effect on hover for profile avatar
+    const profileAvatar = document.querySelector('.profile-avatar');
+    if (profileAvatar) {
+        profileAvatar.addEventListener('mouseenter', function() {
+            this.style.boxShadow = '0 25px 50px rgba(0, 212, 255, 0.5), 0 0 0 6px rgba(255, 255, 255, 0.2)';
+            this.style.transform = 'scale(1.1)';
+        });
+        
+        profileAvatar.addEventListener('mouseleave', function() {
+            this.style.boxShadow = '0 20px 40px rgba(0, 212, 255, 0.3), 0 0 0 4px rgba(255, 255, 255, 0.1)';
+            this.style.transform = 'scale(1)';
+        });
+    }
+
+    // Add CSS for ripple effect
+    const style = document.createElement('style');
+    style.textContent = `
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

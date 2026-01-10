@@ -1,0 +1,778 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Home - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Cursor-style Design -->
+<section class="cursor-hero">
+    <div class="hero-background">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+    <div class="container-fluid px-4 px-lg-5">
+        <div class="row align-items-center py-4" style="padding-top: 2rem !important;">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <div class="hero-badge animate-fade-in">
+                        <i class="fas fa-sparkles me-2"></i>
+                        <span>Diplomatic Excellence Platform</span>
+                    </div>
+                    <h1 class="hero-title animate-slide-up">
+                        Streamline Your<br>
+                        <span class="gradient-text">Diplomatic Workflow</span>
+                    </h1>
+                    <p class="hero-description animate-slide-up-delay">
+                        The most powerful task management system for Ministry of Foreign Affairs. 
+                        Built for diplomats, by diplomats. Experience seamless coordination, 
+                        real-time collaboration, and enterprise-grade security.
+                    </p>
+                    <div class="hero-actions animate-slide-up-delay-2">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'tasks:dashboard' %}" class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-rocket me-2"></i>Go to Dashboard
+                            </a>
+                            <a href="{% url 'tasks:task_create' %}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-plus me-2"></i>Create Task
+                            </a>
+                        {% else %}
+                            <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-user-plus me-2"></i>Get Started
+                            </a>
+                            <a href="{% url 'users:login' %}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="hero-stats animate-fade-in-delay">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ total_users|default:"500+" }}</div>
+                            <div class="stat-label">Active Users</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ total_tasks|default:"1.2K+" }}</div>
+                            <div class="stat-label">Tasks Managed</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">99.9%</div>
+                            <div class="stat-label">Uptime</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-visual">
+                    <div class="floating-card card-1">
+                        <i class="fas fa-tasks"></i>
+                        <span>Task Management</span>
+                    </div>
+                    <div class="floating-card card-2">
+                        <i class="fas fa-users"></i>
+                        <span>Team Collaboration</span>
+                    </div>
+                    <div class="floating-card card-3">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </div>
+                    <div class="floating-card card-4">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Security</span>
+                    </div>
+                    <img src="{% static 'img/diplomacy-animated.svg' %}" alt="Diplomatic illustration" class="hero-illustration">
+                    <div class="center-glow"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Grid Section -->
+<section class="features-section py-5">
+    <div class="container-fluid px-4 px-lg-5">
+        <div class="section-header text-center mb-5">
+            <h2 class="section-title">Everything You Need</h2>
+            <p class="section-subtitle">Powerful features designed for modern diplomatic operations</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card-modern">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h3 class="feature-title">Smart Task Management</h3>
+                    <p class="feature-description">
+                        Create, assign, and track tasks with intelligent prioritization, 
+                        deadline management, and automated workflows.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card-modern">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h3 class="feature-title">Team Coordination</h3>
+                    <p class="feature-description">
+                        Seamless collaboration across departments with role-based access, 
+                        real-time updates, and communication tools.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card-modern">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3 class="feature-title">Advanced Analytics</h3>
+                    <p class="feature-description">
+                        Comprehensive dashboards and reports to track productivity, 
+                        performance metrics, and operational insights.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card-modern">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="feature-title">Real-time Notifications</h3>
+                    <p class="feature-description">
+                        Stay informed with instant alerts for task updates, 
+                        deadlines, and important announcements.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card-modern">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Mobile First</h3>
+                    <p class="feature-description">
+                        Access your workspace from any device with our 
+                        fully responsive, mobile-optimized interface.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card-modern">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Enterprise Security</h3>
+                    <p class="feature-description">
+                        Bank-level encryption, GDPR compliance, and 
+                        government-grade security infrastructure.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Showcase -->
+<section class="stats-showcase py-5">
+    <div class="container-fluid px-4 px-lg-5">
+        <div class="stats-grid">
+            <div class="stat-card-modern">
+                <div class="stat-icon-modern">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number-modern">{{ total_users|default:"500+" }}</div>
+                    <div class="stat-label-modern">Active Users</div>
+                </div>
+            </div>
+            <div class="stat-card-modern">
+                <div class="stat-icon-modern">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number-modern">{{ total_tasks|default:"1,200+" }}</div>
+                    <div class="stat-label-modern">Tasks Completed</div>
+                </div>
+            </div>
+            <div class="stat-card-modern">
+                <div class="stat-icon-modern">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number-modern">{{ completed_tasks|default:"950+" }}</div>
+                    <div class="stat-label-modern">Success Rate</div>
+                </div>
+            </div>
+            <div class="stat-card-modern">
+                <div class="stat-icon-modern">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number-modern">{{ pending_tasks|default:"250+" }}</div>
+                    <div class="stat-label-modern">In Progress</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section py-5">
+    <div class="container-fluid px-4 px-lg-5">
+        <div class="cta-card">
+            <div class="cta-content">
+                <h2 class="cta-title">Ready to Transform Your Workflow?</h2>
+                <p class="cta-description">
+                    Join thousands of diplomats already using MOFA Task Tracker 
+                    to streamline their operations and boost productivity.
+                </p>
+                {% if not user.is_authenticated %}
+                    <div class="cta-actions">
+                        <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-rocket me-2"></i>Start Free Trial
+                        </a>
+                        <a href="{% url 'users:login' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </a>
+                    </div>
+                {% else %}
+                    <a href="{% url 'tasks:dashboard' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Cursor-style Hero Section */
+.cursor-hero {
+    position: relative;
+    min-height: auto;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding: 2rem 0 4rem;
+    margin-top: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+.hero-background {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.gradient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: float-orb 20s ease-in-out infinite;
+}
+
+.orb-1 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(23, 184, 197, 0.4), transparent);
+    top: -200px;
+    left: -200px;
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(108, 99, 255, 0.4), transparent);
+    bottom: -150px;
+    right: -150px;
+    animation-delay: 5s;
+}
+
+.orb-3 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(244, 201, 93, 0.3), transparent);
+    top: 50%;
+    right: 10%;
+    animation-delay: 10s;
+}
+
+@keyframes float-orb {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -30px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: rgba(23, 184, 197, 0.1);
+    border: 1px solid rgba(23, 184, 197, 0.3);
+    border-radius: 50px;
+    color: var(--primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.hero-title {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-description {
+    font-size: 1.25rem;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 100%;
+    margin-bottom: 2rem;
+}
+
+.hero-actions {
+    margin-bottom: 3rem;
+}
+
+.hero-stats {
+    display: flex;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: left;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Hero Visual */
+.hero-visual {
+    position: relative;
+    height: 500px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-illustration {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    max-width: 75%;
+    height: auto;
+    filter: drop-shadow(0 25px 45px rgba(0,0,0,0.35));
+    opacity: 0.85;
+    animation: float 8s ease-in-out infinite;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.floating-card {
+    position: absolute;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    animation: float-card 6s ease-in-out infinite;
+    z-index: 3;
+    min-width: 140px;
+}
+
+.floating-card i {
+    font-size: 1.75rem;
+    color: var(--primary);
+}
+
+.floating-card span {
+    font-size: 0.8125rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Position cards around the illustration without overlap */
+.card-1 {
+    top: 5%;
+    left: 0;
+    animation-delay: 0s;
+}
+
+.card-2 {
+    top: 0;
+    right: 0;
+    animation-delay: 1.5s;
+}
+
+.card-3 {
+    bottom: 10%;
+    left: 5%;
+    animation-delay: 3s;
+}
+
+.card-4 {
+    bottom: 5%;
+    right: 5%;
+    animation-delay: 4.5s;
+}
+
+@keyframes float-card {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+.center-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(23, 184, 197, 0.2), transparent);
+    border-radius: 50%;
+    filter: blur(60px);
+    animation: pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.8s ease-out;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.8s ease-out;
+}
+
+.animate-slide-up-delay {
+    animation: slideUp 0.8s ease-out 0.2s both;
+}
+
+.animate-slide-up-delay-2 {
+    animation: slideUp 0.8s ease-out 0.4s both;
+}
+
+.animate-fade-in-delay {
+    animation: fadeIn 0.8s ease-out 0.6s both;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Features Section */
+.features-section {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 100%;
+}
+
+.section-header {
+    margin-bottom: 4rem;
+}
+
+.section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.section-subtitle {
+    font-size: 1.125rem;
+    color: var(--muted);
+}
+
+.feature-card-modern {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    height: 100%;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.feature-card-modern:hover::before {
+    transform: scaleX(1);
+}
+
+.feature-card-modern:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.4);
+    border-color: rgba(23, 184, 197, 0.5);
+}
+
+.feature-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, rgba(23, 184, 197, 0.2), rgba(108, 99, 255, 0.2));
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.feature-icon-wrapper i {
+    font-size: 1.75rem;
+    color: var(--primary);
+}
+
+.feature-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.feature-description {
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+/* Stats Showcase */
+.stats-showcase {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 100%;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.stat-card-modern {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: var(--transition);
+}
+
+.stat-card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(23, 184, 197, 0.5);
+}
+
+.stat-icon-modern {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, rgba(23, 184, 197, 0.2), rgba(108, 99, 255, 0.2));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-icon-modern i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.stat-number-modern {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label-modern {
+    font-size: 0.875rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* CTA Section */
+.cta-section {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 100%;
+}
+
+.cta-card {
+    background: linear-gradient(135deg, rgba(23, 184, 197, 0.1), rgba(108, 99, 255, 0.1));
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 4rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(23, 184, 197, 0.05), rgba(108, 99, 255, 0.05));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.cta-card:hover::before {
+    opacity: 1;
+}
+
+.cta-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.cta-description {
+    font-size: 1.125rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .hero-stats {
+        gap: 2rem;
+    }
+    
+    .hero-visual {
+        height: 380px;
+        margin-top: 3rem;
+    }
+    .hero-illustration {
+        position: relative;
+        bottom: 0;
+        right: 0;
+        width: 85%;
+        margin-top: 2rem;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .floating-card {
+        padding: 1rem;
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        margin: 0.5rem auto;
+        width: 90%;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe feature cards
+    document.querySelectorAll('.feature-card-modern, .stat-card-modern').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+});
+</script>
+{% endblock %}

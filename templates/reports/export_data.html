@@ -1,0 +1,550 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Export Data - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="reports-container">
+    <div class="reports-header">
+        <h1 class="reports-title">
+            <i class="fas fa-download me-3"></i>
+            Data Export Center
+        </h1>
+        <p class="reports-subtitle">
+            Export system data in various formats for analysis and reporting
+        </p>
+    </div>
+
+    <!-- Export Options -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="cyber-chart-container">
+                <h5 class="chart-title">
+                    <i class="fas fa-cog me-2"></i>
+                    Export Configuration
+                </h5>
+                <form method="post" class="export-form">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="data_type" class="form-label">Data Type</label>
+                            <select class="form-select" id="data_type" name="data_type" required>
+                                <option value="">Select data type to export</option>
+                                <option value="Tasks">Tasks - All task data with details</option>
+                                <option value="Users">Users - User information and statistics</option>
+                                <option value="Task Comments">Task Comments - All task comments and attachments</option>
+                                <option value="Performance Metrics">Performance Metrics - Team performance data</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="format" class="form-label">Export Format</label>
+                            <select class="form-select" id="format" name="format" required>
+                                <option value="">Select export format</option>
+                                <option value="CSV">CSV - Comma Separated Values</option>
+                                <option value="JSON">JSON - JavaScript Object Notation</option>
+                                <option value="Excel">Excel - Microsoft Excel Format</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-6">
+                            <label for="date_from" class="form-label">From Date (Optional)</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="date_to" class="form-label">To Date (Optional)</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to">
+                        </div>
+                    </div>
+                    <div class="export-actions mt-4">
+                        <button type="submit" class="btn cyber-btn text-white">
+                            <i class="fas fa-download me-2"></i>Export Data
+                        </button>
+                        <button type="button" class="btn cyber-btn-outline" onclick="previewData()">
+                            <i class="fas fa-eye me-2"></i>Preview Data
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="cyber-chart-container">
+                <h5 class="chart-title">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Export Information
+                </h5>
+                <div class="export-info">
+                    <div class="info-item">
+                        <i class="fas fa-file-csv text-success"></i>
+                        <div>
+                            <h6>CSV Format</h6>
+                            <p class="text-muted">Best for spreadsheet applications and data analysis</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-file-code text-warning"></i>
+                        <div>
+                            <h6>JSON Format</h6>
+                            <p class="text-muted">Ideal for API integration and web applications</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-file-excel text-primary"></i>
+                        <div>
+                            <h6>Excel Format</h6>
+                            <p class="text-muted">Perfect for advanced reporting and presentations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Export Options -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="cyber-chart-container">
+                <h5 class="chart-title">
+                    <i class="fas fa-bolt me-2"></i>
+                    Quick Export Options
+                </h5>
+                <div class="quick-export-grid">
+                    <div class="quick-export-item" onclick="quickExport('tasks', 'csv')">
+                        <div class="export-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <h6>All Tasks (CSV)</h6>
+                        <p class="text-muted">Export all task data</p>
+                    </div>
+                    <div class="quick-export-item" onclick="quickExport('users', 'csv')">
+                        <div class="export-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h6>All Users (CSV)</h6>
+                        <p class="text-muted">Export user information</p>
+                    </div>
+                    <div class="quick-export-item" onclick="quickExport('performance', 'csv')">
+                        <div class="export-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h6>Performance (CSV)</h6>
+                        <p class="text-muted">Export team metrics</p>
+                    </div>
+                    <div class="quick-export-item" onclick="quickExport('tasks', 'excel')">
+                        <div class="export-icon">
+                            <i class="fas fa-file-excel"></i>
+                        </div>
+                        <h6>Tasks (Excel)</h6>
+                        <p class="text-muted">Advanced task report</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export History -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="cyber-table-container">
+                <h5 class="table-title">
+                    <i class="fas fa-history me-2"></i>
+                    Recent Exports
+                </h5>
+                <div class="table-responsive">
+                    <table class="table cyber-table">
+                        <thead>
+                            <tr>
+                                <th>Export Type</th>
+                                <th>Format</th>
+                                <th>Date Range</th>
+                                <th>Exported At</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="cyber-badge category-badge">
+                                        <i class="fas fa-tasks me-1"></i>Tasks
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="format-badge csv">CSV</span>
+                                </td>
+                                <td>All Time</td>
+                                <td>{{ "now"|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    <span class="status-badge success">
+                                        <i class="fas fa-check-circle me-1"></i>Completed
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm cyber-btn-icon" title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="cyber-badge category-badge">
+                                        <i class="fas fa-users me-1"></i>Users
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="format-badge excel">Excel</span>
+                                </td>
+                                <td>Last 30 Days</td>
+                                <td>{{ "now"|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    <span class="status-badge success">
+                                        <i class="fas fa-check-circle me-1"></i>Completed
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm cyber-btn-icon" title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="cyber-badge category-badge">
+                                        <i class="fas fa-chart-line me-1"></i>Performance
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="format-badge json">JSON</span>
+                                </td>
+                                <td>This Month</td>
+                                <td>{{ "now"|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    <span class="status-badge processing">
+                                        <i class="fas fa-spinner fa-spin me-1"></i>Processing
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm cyber-btn-icon disabled" title="Processing" disabled>
+                                        <i class="fas fa-clock"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function quickExport(dataType, format) {
+    // Create a form and submit it
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '';
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+    
+    const dataTypeInput = document.createElement('input');
+    dataTypeInput.type = 'hidden';
+    dataTypeInput.name = 'data_type';
+    dataTypeInput.value = dataType;
+    form.appendChild(dataTypeInput);
+    
+    const formatInput = document.createElement('input');
+    formatInput.type = 'hidden';
+    formatInput.name = 'format';
+    formatInput.value = format;
+    form.appendChild(formatInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function previewData() {
+    const dataType = document.getElementById('data_type').value;
+    const format = document.getElementById('format').value;
+    
+    if (!dataType || !format) {
+        alert('Please select both data type and format');
+        return;
+    }
+    
+    // Show preview modal or redirect to preview page
+    alert(`Preview for ${dataType} in ${format} format would be shown here`);
+}
+
+// Auto-fill date fields
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+    
+    document.getElementById('date_to').value = today.toISOString().split('T')[0];
+    document.getElementById('date_from').value = thirtyDaysAgo.toISOString().split('T')[0];
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.reports-container {
+    position: relative;
+    padding: 2rem;
+    background: var(--bg-surface);
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.reports-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.reports-header {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.reports-title {
+    color: var(--text-primary);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.reports-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.cyber-chart-container {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.cyber-table-container {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+}
+
+.chart-title, .table-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+}
+
+.export-form .form-label {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.export-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.export-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 212, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.info-item i {
+    font-size: 1.5rem;
+    margin-top: 0.25rem;
+}
+
+.info-item h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.info-item p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.quick-export-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.quick-export-item {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(139, 92, 246, 0.1));
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quick-export-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border-color: var(--primary-color);
+}
+
+.export-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.quick-export-item h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.quick-export-item p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+.cyber-table {
+    color: var(--text-primary);
+    margin-bottom: 0;
+}
+
+.cyber-table th {
+    background: rgba(0, 212, 255, 0.1);
+    color: var(--text-primary);
+    border: none;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.cyber-table td {
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.cyber-table tbody tr:hover {
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.format-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.format-badge.csv {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.format-badge.excel {
+    background: rgba(0, 212, 255, 0.2);
+    color: #00d4ff;
+}
+
+.format-badge.json {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-badge.success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.status-badge.processing {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.cyber-btn-icon {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 8px;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.cyber-btn-icon:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.cyber-btn-icon.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+</style>
+{% endblock %}

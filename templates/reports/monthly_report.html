@@ -1,0 +1,647 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Monthly Report - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 py-4">
+<div class="reports-container">
+    <div class="reports-header">
+        <h1 class="reports-title">
+            <i class="fas fa-calendar me-3"></i>
+            Monthly Report - {{ month }}
+        </h1>
+        <p class="reports-subtitle">
+            Comprehensive monthly analysis and performance metrics
+        </p>
+    </div>
+
+    <!-- Monthly Overview Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="cyber-stat-card">
+                <div class="stat-icon text-primary"><i class="fas fa-tasks"></i></div>
+                <div class="stat-value">{{ total_monthly }}</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="cyber-stat-card">
+                <div class="stat-icon text-success"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-value">{{ completed_monthly }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="cyber-stat-card">
+                <div class="stat-icon text-warning"><i class="fas fa-clock"></i></div>
+                <div class="stat-value">{{ pending_monthly }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="cyber-stat-card">
+                <div class="stat-icon text-info"><i class="fas fa-spinner"></i></div>
+                <div class="stat-value">{{ in_progress_monthly }}</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="cyber-chart-container">
+                <h5 class="chart-title">Monthly Completion Rate</h5>
+                <div class="completion-rate-display">
+                    <div class="rate-circle-large">
+                        <svg class="progress-ring-large" width="200" height="200">
+                            <circle class="progress-ring-circle" 
+                                    stroke="var(--border-color)" 
+                                    stroke-width="8" 
+                                    fill="transparent" 
+                                    r="90" 
+                                    cx="100" 
+                                    cy="100"/>
+                            <circle class="progress-ring-circle progress-ring-fill" 
+                                    stroke="var(--primary-color)" 
+                                    stroke-width="8" 
+                                    fill="transparent" 
+                                    r="90" 
+                                    cx="100" 
+                                    cy="100"
+                                    style="stroke-dasharray: 565.48; stroke-dashoffset: {% widthratio completion_rate 100 -565.48 %};"/>
+                        </svg>
+                        <div class="rate-text-large">{{ completion_rate }}%</div>
+                    </div>
+                    <div class="rate-details">
+                        <h6>Completion Rate</h6>
+                        <p class="text-muted">{{ completed_monthly }} out of {{ total_monthly }} tasks completed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="cyber-chart-container">
+                <h5 class="chart-title">Average Completion Time</h5>
+                <div class="completion-time-display">
+                    <div class="time-icon">
+                        <i class="fas fa-stopwatch"></i>
+                    </div>
+                    <div class="time-value">{{ avg_completion_time }}</div>
+                    <div class="time-label">Days</div>
+                    <div class="time-description">
+                        Average time from task creation to completion
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="cyber-chart-container">
+                <h5 class="chart-title">Priority Distribution</h5>
+                <div class="chart-wrapper">
+                    <canvas id="priorityChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="cyber-chart-container">
+                <h5 class="chart-title">Category Distribution</h5>
+                <div class="chart-wrapper">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Trend Chart -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="cyber-chart-container">
+                <h5 class="chart-title">Daily Task Creation Trend</h5>
+                <div class="chart-wrapper">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="cyber-table-container">
+                <h5 class="table-title">Priority Breakdown</h5>
+                <div class="table-responsive">
+                    <table class="table cyber-table">
+                        <thead>
+                            <tr>
+                                <th>Priority</th>
+                                <th>Count</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in priority_dist %}
+                            <tr>
+                                <td>
+                                    <span class="cyber-badge priority-{{ stat.priority|lower }}">
+                                        {{ stat.priority|title }}
+                                    </span>
+                                </td>
+                                <td>{{ stat.count }}</td>
+                                <td>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar" style="width: {% widthratio stat.count total_monthly 100 %}%"></div>
+                                    </div>
+                                    <small>{% widthratio stat.count total_monthly 100 %}%</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="cyber-table-container">
+                <h5 class="table-title">Category Breakdown</h5>
+                <div class="table-responsive">
+                    <table class="table cyber-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Count</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in category_dist %}
+                            <tr>
+                                <td>
+                                    <span class="cyber-badge category-badge">
+                                        {{ stat.category|title }}
+                                    </span>
+                                </td>
+                                <td>{{ stat.count }}</td>
+                                <td>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar" style="width: {% widthratio stat.count total_monthly 100 %}%"></div>
+                                    </div>
+                                    <small>{% widthratio stat.count total_monthly 100 %}%</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Summary -->
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="cyber-chart-container">
+                <h5 class="chart-title">Monthly Summary</h5>
+                <div class="summary-content">
+                    <div class="summary-item">
+                        <i class="fas fa-chart-line text-primary"></i>
+                        <div>
+                            <h6>Productivity Trend</h6>
+                            <p class="text-muted">
+                                {% if completion_rate >= 80 %}
+                                    Excellent productivity this month with {{ completion_rate }}% completion rate.
+                                {% elif completion_rate >= 60 %}
+                                    Good productivity this month with {{ completion_rate }}% completion rate.
+                                {% elif completion_rate >= 40 %}
+                                    Average productivity this month with {{ completion_rate }}% completion rate.
+                                {% else %}
+                                    Productivity needs improvement with {{ completion_rate }}% completion rate.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-clock text-warning"></i>
+                        <div>
+                            <h6>Efficiency Metrics</h6>
+                            <p class="text-muted">
+                                Average task completion time is {{ avg_completion_time }} days, 
+                                with {{ total_monthly }} total tasks created this month.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-target text-success"></i>
+                        <div>
+                            <h6>Goals & Recommendations</h6>
+                            <p class="text-muted">
+                                {% if completion_rate < 70 %}
+                                    Focus on improving task completion rates and reducing pending tasks.
+                                {% else %}
+                                    Maintain current productivity levels and continue efficient task management.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Priority Chart
+    const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+    const priorityData = {{ priority_dist|safe }};
+    new Chart(priorityCtx, {
+        type: 'doughnut',
+        data: {
+            labels: priorityData.map(item => item.priority.charAt(0).toUpperCase() + item.priority.slice(1)),
+            datasets: [{
+                data: priorityData.map(item => item.count),
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(239, 68, 68, 0.7)',
+                    'rgba(139, 92, 246, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(239, 68, 68, 1)',
+                    'rgba(139, 92, 246, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'var(--text-secondary)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Category Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryData = {{ category_dist|safe }};
+    new Chart(categoryCtx, {
+        type: 'pie',
+        data: {
+            labels: categoryData.map(item => item.category.charAt(0).toUpperCase() + item.category.slice(1)),
+            datasets: [{
+                data: categoryData.map(item => item.count),
+                backgroundColor: [
+                    'rgba(0, 212, 255, 0.7)',
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(239, 68, 68, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(0, 212, 255, 1)',
+                    'rgba(139, 92, 246, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(239, 68, 68, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'var(--text-secondary)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Trend Chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendData = {{ daily_tasks|safe }};
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: trendData.map(item => new Date(item.date).toLocaleDateString()),
+            datasets: [{
+                label: 'Tasks Created',
+                data: trendData.map(item => item.count),
+                borderColor: 'rgba(0, 212, 255, 1)',
+                backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: 'rgba(0, 212, 255, 1)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'var(--text-secondary)'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: 'var(--text-secondary)'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: 'var(--text-secondary)'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.reports-container {
+    position: relative;
+    padding: 2rem;
+    background: var(--bg-surface);
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.reports-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.reports-header {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.reports-title {
+    color: var(--text-primary);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.reports-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.cyber-stat-card {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.cyber-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.cyber-chart-container {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.cyber-table-container {
+    background: var(--bg-card);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+}
+
+.chart-title, .table-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+}
+
+.chart-wrapper {
+    height: 300px;
+    position: relative;
+}
+
+.completion-rate-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem 0;
+}
+
+.rate-circle-large {
+    position: relative;
+    display: inline-block;
+}
+
+.progress-ring-large {
+    transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+    transition: stroke-dashoffset 0.5s ease-in-out;
+}
+
+.rate-text-large {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--text-primary);
+}
+
+.rate-details h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.completion-time-display {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.time-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.time-value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.time-label {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.time-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.cyber-table {
+    color: var(--text-primary);
+    margin-bottom: 0;
+}
+
+.cyber-table th {
+    background: rgba(0, 212, 255, 0.1);
+    color: var(--text-primary);
+    border: none;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.cyber-table td {
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.cyber-table tbody tr:hover {
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.progress {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 8px;
+}
+
+.summary-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.summary-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(0, 212, 255, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.summary-item i {
+    font-size: 1.5rem;
+    margin-top: 0.25rem;
+}
+
+.summary-item h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.summary-item p {
+    margin-bottom: 0;
+    line-height: 1.6;
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+}
+</style>
+{% endblock %}

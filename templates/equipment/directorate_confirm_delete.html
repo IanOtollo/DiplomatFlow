@@ -1,0 +1,39 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Delete Directorate - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-header bg-transparent border-0">
+                    <h4 class="text-white mb-0">
+                        <i class="fas fa-exclamation-triangle me-2 text-warning"></i>Confirm Deletion
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-white">Are you sure you want to delete this directorate?</p>
+                    <div class="alert alert-warning">
+                        <strong>{{ object.name }}</strong> ({{ object.code }})<br>
+                        <small>Location: {{ object.location|default:"N/A" }}</small>
+                    </div>
+                    <p class="text-muted">This action cannot be undone. All associated assignments will be preserved but the directorate record will be removed.</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Yes, Delete
+                            </button>
+                            <a href="{% url 'equipment:directorate_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

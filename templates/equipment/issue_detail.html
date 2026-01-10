@@ -1,0 +1,114 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ issue.title }} - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="text-white mb-2">{{ issue.title }}</h1>
+            <p class="text-muted">Issue Details</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group">
+                {% if issue.status != 'resolved' and issue.status != 'closed' %}
+                <a href="{% url 'equipment:issue_resolve' issue.pk %}" class="btn btn-success">
+                    <i class="fas fa-check me-2"></i>Resolve
+                </a>
+                {% endif %}
+                <a href="{% url 'equipment:issue_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg mb-4" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="text-white mb-0">Issue Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong class="text-muted">Equipment:</strong>
+                            <p class="text-white">{{ issue.equipment }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong class="text-muted">Severity:</strong>
+                            <p>
+                                <span class="badge bg-{% if issue.severity == 'low' %}info{% elif issue.severity == 'medium' %}warning{% elif issue.severity == 'high' %}danger{% else %}danger{% endif %}">
+                                    {{ issue.get_severity_display }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong class="text-muted">Status:</strong>
+                            <p>
+                                <span class="badge bg-{% if issue.status == 'reported' %}warning{% elif issue.status == 'in_progress' %}info{% elif issue.status == 'resolved' %}success{% else %}secondary{% endif %}">
+                                    {{ issue.get_status_display }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong class="text-muted">Reported By:</strong>
+                            <p class="text-white">{{ issue.reported_by.get_full_name|default:issue.reported_by.username }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong class="text-muted">Reported At:</strong>
+                            <p class="text-white">{{ issue.reported_at|date:"F d, Y H:i" }}</p>
+                        </div>
+                        {% if issue.resolved_by %}
+                        <div class="col-md-6 mb-3">
+                            <strong class="text-muted">Resolved By:</strong>
+                            <p class="text-white">{{ issue.resolved_by.get_full_name|default:issue.resolved_by.username }}</p>
+                        </div>
+                        {% endif %}
+                        {% if issue.resolved_at %}
+                        <div class="col-md-6 mb-3">
+                            <strong class="text-muted">Resolved At:</strong>
+                            <p class="text-white">{{ issue.resolved_at|date:"F d, Y H:i" }}</p>
+                        </div>
+                        {% endif %}
+                        <div class="col-12 mb-3">
+                            <strong class="text-muted">Description:</strong>
+                            <p class="text-white">{{ issue.description|linebreaks }}</p>
+                        </div>
+                        {% if issue.resolution_notes %}
+                        <div class="col-12 mb-3">
+                            <strong class="text-muted">Resolution Notes:</strong>
+                            <p class="text-white">{{ issue.resolution_notes|linebreaks }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-lg" style="background: var(--card); border: 1px solid var(--border) !important;">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="text-white mb-0">Equipment Details</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong class="text-muted">Type:</strong> <span class="text-white">{{ issue.equipment.get_equipment_type_display }}</span></p>
+                    <p><strong class="text-muted">Brand/Model:</strong> <span class="text-white">{{ issue.equipment.brand }} {{ issue.equipment.model }}</span></p>
+                    <p><strong class="text-muted">Serial:</strong> <span class="text-white">{{ issue.equipment.serial_number }}</span></p>
+                    <p><strong class="text-muted">Condition:</strong> 
+                        <span class="badge bg-{% if issue.equipment.condition == 'excellent' %}success{% elif issue.equipment.condition == 'good' %}info{% elif issue.equipment.condition == 'fair' %}warning{% else %}danger{% endif %}">
+                            {{ issue.equipment.get_condition_display }}
+                        </span>
+                    </p>
+                    <a href="{% url 'equipment:equipment_detail' issue.equipment.pk %}" class="btn btn-sm btn-outline-primary w-100 mt-3">
+                        <i class="fas fa-eye me-2"></i>View Equipment
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

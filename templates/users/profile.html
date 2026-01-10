@@ -1,0 +1,169 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Profile - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 py-4">
+    <div class="row">
+        <div class="col-lg-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent border-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>My Profile
+                    </h4>
+                    <a href="{% url 'users:profile_update' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit me-1"></i>Edit Profile
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-4">
+                        <div class="profile-picture mb-3">
+                            {% if user_profile.profile_picture %}
+                                <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture" 
+                                     class="rounded-circle" width="120" height="120" style="object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" 
+                                     style="width: 120px; height: 120px; margin: 0 auto;">
+                                    <i class="fas fa-user fa-3x text-white"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <h5 class="fw-bold">{{ user_profile.get_full_name }}</h5>
+                        <p class="text-muted">{{ user_profile.get_position_display }}</p>
+                        <p class="text-muted">{{ user_profile.get_department_display }}</p>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">First Name</label>
+                                <p class="form-control-plaintext">{{ user_profile.first_name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Last Name</label>
+                                <p class="form-control-plaintext">{{ user_profile.last_name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Username</label>
+                                <p class="form-control-plaintext">{{ user_profile.username }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Email</label>
+                                <p class="form-control-plaintext">{{ user_profile.email }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Phone Number</label>
+                                <p class="form-control-plaintext">
+                                    {% if user_profile.phone_number %}
+                                        {{ user_profile.phone_number }}
+                                    {% else %}
+                                        <span class="text-muted">Not provided</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Room Number</label>
+                                <p class="form-control-plaintext">
+                                    {% if user_profile.room_number %}
+                                        {{ user_profile.room_number }}
+                                    {% else %}
+                                        <span class="text-muted">Not provided</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Department</label>
+                                <p class="form-control-plaintext">{{ user_profile.get_department_display }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Position</label>
+                                <p class="form-control-plaintext">{{ user_profile.get_position_display }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Date Joined</label>
+                                <p class="form-control-plaintext">{{ user_profile.date_joined|date:"F d, Y" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Last Login</label>
+                                <p class="form-control-plaintext">
+                                    {% if user_profile.last_login %}
+                                        {{ user_profile.last_login|date:"F d, Y g:i A" }}
+                                    {% else %}
+                                        <span class="text-muted">Never</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Task Statistics -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Task Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="display-6 text-primary fw-bold">{{ total_tasks }}</div>
+                            <small class="text-muted">Total Tasks</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="display-6 text-warning fw-bold">{{ pending_tasks }}</div>
+                            <small class="text-muted">Pending</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="display-6 text-info fw-bold">{{ in_progress_tasks }}</div>
+                            <small class="text-muted">In Progress</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="display-6 text-success fw-bold">{{ completed_tasks }}</div>
+                            <small class="text-muted">Completed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'tasks:task_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create Task
+                    </a>
+                    <a href="{% url 'tasks:task_list' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>View All Tasks
+                    </a>
+                    <a href="{% url 'users:password_change' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-key me-2"></i>Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+{% endblock %}

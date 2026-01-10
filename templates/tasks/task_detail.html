@@ -1,0 +1,402 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+
+{% block title %}{{ task.title }} - MOFA Task Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-detail-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .task-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .task-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    
+    .task-status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .status-in_progress { background: rgba(6, 182, 212, 0.2); color: #06b6d4; }
+    .status-completed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .status-cancelled { background: rgba(107, 114, 128, 0.2); color: #6b7280; }
+    .status-on_hold { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
+    
+    .priority-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .priority-low { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .priority-medium { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .priority-high { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .priority-urgent { background: rgba(220, 38, 38, 0.2); color: #dc2626; }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .comment-card {
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .comment-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .attachment-item {
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .attachment-item:hover {
+        background: rgba(255, 255, 255, 0.9);
+        transform: translateX(5px);
+    }
+    
+    .btn-action {
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px var(--primary-color);
+    }
+    
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 12px;
+        width: 2px;
+        height: calc(100% + 1rem);
+        background: linear-gradient(to bottom, var(--primary-color), transparent);
+    }
+    
+    .timeline-item:last-child::after {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="task-detail-container">
+    <div class="container-fluid px-4 px-lg-5">
+        <!-- Task Header -->
+        <div class="task-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center mb-3">
+                        <a href="{% url 'tasks:task_list' %}" class="btn btn-light me-3">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Tasks
+                        </a>
+                        <span class="task-status-badge status-{{ task.status }}">
+                            {{ task.get_status_display }}
+                        </span>
+                    </div>
+                    <h1 class="display-5 fw-bold mb-3">{{ task.title }}</h1>
+                    <div class="d-flex flex-wrap gap-3 mb-3">
+                        <span class="priority-badge priority-{{ task.priority }}">
+                            <i class="fas fa-flag me-1"></i>{{ task.get_priority_display }}
+                        </span>
+                        <span class="badge bg-light text-dark">
+                            <i class="fas fa-tag me-1"></i>{{ task.get_category_display }}
+                        </span>
+                        {% if task.room_number %}
+                        <span class="badge bg-light text-dark">
+                            <i class="fas fa-door-open me-1"></i>Room {{ task.room_number }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="d-flex flex-column gap-2">
+                        <a href="{% url 'tasks:task_update' task.pk %}" class="btn btn-light btn-action">
+                            <i class="fas fa-edit me-2"></i>Edit Task
+                        </a>
+                        {% if task.status != 'completed' %}
+                        <form method="post" action="{% url 'tasks:task_complete' task.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-action w-100">
+                                <i class="fas fa-check me-2"></i>Mark Complete
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Task Description -->
+                <div class="glass-card">
+                    <h3 class="fw-bold mb-3">
+                        <i class="fas fa-file-alt me-2 text-primary"></i>Description
+                    </h3>
+                    <div class="task-description">
+                        {% if task.description %}
+                            {{ task.description|linebreaks }}
+                        {% else %}
+                            <p class="text-muted fst-italic">No description provided.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="glass-card">
+                    <h3 class="fw-bold mb-4">
+                        <i class="fas fa-comments me-2 text-primary"></i>Comments
+                        <span class="badge bg-primary ms-2">{{ comments.count }}</span>
+                    </h3>
+                    
+                    <!-- Add Comment Form -->
+                    <form method="post" action="{% url 'tasks:add_comment' task.pk %}" class="mb-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ comment_form.content|add_class:"form-control" }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Add Comment
+                        </button>
+                    </form>
+                    
+                    <!-- Comments List -->
+                    <div class="comments-list">
+                        {% for comment in comments %}
+                        <div class="comment-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                        {{ comment.author.first_name|first }}{{ comment.author.last_name|first }}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">{{ comment.author.get_full_name }}</h6>
+                                        <small class="text-muted">{{ comment.created_at|date:"M d, Y g:i A" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="comment-content">
+                                {{ comment.content|linebreaks }}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-comment-slash fa-3x mb-3"></i>
+                            <p>No comments yet. Be the first to comment!</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Task Details -->
+                <div class="glass-card">
+                    <h4 class="fw-bold mb-3">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>Task Details
+                    </h4>
+                    <div class="timeline-item">
+                        <h6 class="fw-bold text-muted mb-1">Created</h6>
+                        <p class="mb-0">{{ task.created_at|date:"M d, Y g:i A" }}</p>
+                        <small class="text-muted">by {{ task.created_by.get_full_name }}</small>
+                    </div>
+                    
+                    {% if task.assigned_to %}
+                    <div class="timeline-item">
+                        <h6 class="fw-bold text-muted mb-1">Assigned To</h6>
+                        <p class="mb-0">{{ task.assigned_to.get_full_name }}</p>
+                        <small class="text-muted">{{ task.assigned_to.department }}</small>
+                    </div>
+                    {% endif %}
+                    
+                    {% if task.reported_by %}
+                    <div class="timeline-item">
+                        <h6 class="fw-bold text-muted mb-1">Reported By</h6>
+                        <p class="mb-0">{{ task.reported_by.get_full_name }}</p>
+                        <small class="text-muted">{{ task.reported_by.department }}</small>
+                    </div>
+                    {% endif %}
+                    
+                    {% if task.due_date %}
+                    <div class="timeline-item">
+                        <h6 class="fw-bold text-muted mb-1">Due Date</h6>
+                        <p class="mb-0">{{ task.due_date|date:"M d, Y" }}</p>
+                        {% if task.is_overdue %}
+                        <small class="text-danger">
+                            <i class="fas fa-exclamation-triangle me-1"></i>Overdue
+                        </small>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if task.date_completed %}
+                    <div class="timeline-item">
+                        <h6 class="fw-bold text-muted mb-1">Completed</h6>
+                        <p class="mb-0">{{ task.date_completed|date:"M d, Y g:i A" }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Attachments -->
+                {% if attachments %}
+                <div class="glass-card">
+                    <h4 class="fw-bold mb-3">
+                        <i class="fas fa-paperclip me-2 text-primary"></i>Attachments
+                        <span class="badge bg-primary ms-2">{{ attachments.count }}</span>
+                    </h4>
+                    <div class="attachments-list">
+                        {% for attachment in attachments %}
+                        <div class="attachment-item">
+                            <div class="attachment-icon">
+                                <i class="fas fa-file fa-2x text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ attachment.filename }}</h6>
+                                <small class="text-muted">
+                                    Uploaded by {{ attachment.uploaded_by.get_full_name }}<br>
+                                    {{ attachment.uploaded_at|date:"M d, Y g:i A" }}
+                                </small>
+                            </div>
+                            <div>
+                                <a href="{{ attachment.file.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                    <i class="fas fa-download me-1"></i>Download
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Quick Actions -->
+                <div class="glass-card">
+                    <h4 class="fw-bold mb-3">
+                        <i class="fas fa-bolt me-2 text-primary"></i>Quick Actions
+                    </h4>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'tasks:task_update' task.pk %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit me-2"></i>Edit Task
+                        </a>
+                        <a href="{% url 'tasks:task_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i>All Tasks
+                        </a>
+                        <a href="{% url 'tasks:dashboard' %}" class="btn btn-outline-info">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth scrolling for better UX
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Add confirmation for task completion
+    const completeBtn = document.querySelector('button[type="submit"]');
+    if (completeBtn && completeBtn.textContent.includes('Mark Complete')) {
+        completeBtn.addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to mark this task as complete?')) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
