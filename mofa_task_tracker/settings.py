@@ -150,6 +150,8 @@ else:
 # CSRF trusted origins
 CSRF_TRUSTED_ORIGINS = [
     'https://*.azurewebsites.net',
+    'https://*.railway.app',
+    'https://diplomaflow.up.railway.app',
     'https://localhost:8000',
     'https://127.0.0.1:8000',
     'http://localhost:8000',
