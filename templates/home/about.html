@@ -1,0 +1,30 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}About - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-transparent border-0 py-4">
+                    <h2 class="mb-0"><i class="fas fa-info-circle me-2"></i>About MOFA Task Tracker</h2>
+                </div>
+                <div class="card-body p-4">
+                    <p class="lead">Diplomatic workflow management for the Ministry of Foreign Affairs.</p>
+                    <p>MOFA Task Tracker streamlines task coordination, equipment assignment, and reporting across directorates. It provides a secure, centralized platform for managing tasks, ICT equipment, and team performance.</p>
+                    <h5 class="mt-4">Key capabilities</h5>
+                    <ul>
+                        <li>Task creation, assignment, and tracking</li>
+                        <li>ICT equipment and directorate assignment</li>
+                        <li>Reports and analytics</li>
+                        <li>User and role management</li>
+                    </ul>
+                    <p class="text-muted mb-0">Built with Django and designed for reliability and ease of use.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

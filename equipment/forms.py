@@ -61,40 +61,42 @@ class ICTEquipmentForm(forms.ModelForm):
 
 
 class DeviceAssignmentForm(forms.ModelForm):
-    """Form for assigning devices to directorates."""
+    """Form for assigning devices to directorates. Fields: Equipment, Directorate, Room number, Assigned to, Office location."""
     
     class Meta:
         model = DeviceAssignment
         fields = [
-            'equipment', 'directorate', 'assigned_to', 'room_number',
-            'office_location', 'assignment_notes'
+            'equipment', 'directorate', 'room_number',
+            'assigned_to', 'office_location'
         ]
-        widgets = {
-            'assignment_notes': forms.Textarea(attrs={'rows': 3}),
-        }
     
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        self.fields['equipment'].queryset = ICTEquipment.objects.filter(status='available')
-        self.fields['assigned_to'].queryset = User.objects.filter(is_active=True)
+        self.fields['equipment'].queryset = ICTEquipment.objects.filter(status='available').order_by('equipment_type', 'brand', 'serial_number')
+        self.fields['assigned_to'].queryset = User.objects.filter(is_active=True).order_by('last_name', 'first_name')
+        self.fields['directorate'].queryset = Directorate.objects.all().order_by('name')
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            'equipment',
+            Field('equipment', css_class='form-select mb-3'),
+            Field('directorate', css_class='form-select mb-3'),
             Row(
-                Column('directorate', css_class='col-md-6'),
-                Column('assigned_to', css_class='col-md-6'),
+                Column('room_number', css_class='col-md-6 mb-3'),
+                Column('office_location', css_class='col-md-6 mb-3'),
             ),
-            Row(
-                Column('room_number', css_class='col-md-6'),
-                Column('office_location', css_class='col-md-6'),
-            ),
-            'assignment_notes',
+            Field('assigned_to', css_class='form-select mb-3'),
             FormActions(
-                Submit('submit', 'Assign Device', css_class='btn btn-primary'),
+                Submit('submit', 'Assign', css_class='btn btn-primary'),
                 HTML('<a href="{% url "equipment:assignment_list" %}" class="btn btn-secondary">Cancel</a>'),
             )
         )
+    
+    def save(self, commit=True):
+        inst = super().save(commit=False)
+        inst.assignment_notes = ''
+        if commit:
+            inst.save()
+        return inst
 
 
 class DirectorateForm(forms.ModelForm):

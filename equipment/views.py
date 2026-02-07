@@ -203,23 +203,23 @@ class AssignmentCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         assignment = form.save(commit=False)
         assignment.issued_by = self.request.user
+        assignment.save()
         
-        # Create history entry
+        # Create history entry after assignment has a pk
         DeviceHistory.objects.create(
             equipment=assignment.equipment,
             assignment=assignment,
             action='assigned',
             to_directorate=assignment.directorate,
-            to_room=assignment.room_number,
+            to_room=assignment.room_number or '',
             performed_by=self.request.user,
-            notes=assignment.assignment_notes
+            notes=assignment.assignment_notes or ''
         )
         
         # Update equipment status
         assignment.equipment.status = 'assigned'
         assignment.equipment.save()
         
-        assignment.save()
         messages.success(self.request, 'Device assigned successfully!')
         return redirect(self.success_url)
 

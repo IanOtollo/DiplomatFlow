@@ -75,11 +75,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mofa_task_tracker.wsgi.application'
 
-# Database
-import dj_database_url
-
-# Use PostgreSQL in production, SQLite in development
+# Database - use PostgreSQL when DATABASE_URL is set, otherwise SQLite (no extra deps)
 if os.environ.get('DATABASE_URL'):
+    import dj_database_url
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),

@@ -122,16 +122,11 @@ class FuturisticApp {
     handleFormSubmit(e) {
         const form = e.currentTarget;
         const submitBtn = form.querySelector('button[type="submit"]');
-        
-        if (submitBtn) {
-            // Only show processing state if form is valid
-            if (form.checkValidity()) {
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-                submitBtn.disabled = true;
-                
-                // Allow form to submit naturally
-                // Don't prevent default behavior
-            }
+        // Only show "Processing" for forms that opt-in (e.g. AJAX forms). Regular POST forms
+        // would stay on "Processing" if the server returns validation errors or 500.
+        if (submitBtn && form.classList.contains('js-ajax-form') && form.checkValidity()) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            submitBtn.disabled = true;
         }
     }
 
@@ -437,21 +432,13 @@ class FuturisticApp {
     }
 
     addLoadingStates() {
-        // Add loading states to buttons (but don't interfere with form submission)
-        document.querySelectorAll('button[type="submit"]').forEach(btn => {
-            // Skip authentication forms to avoid interference
-            if (btn.form && (btn.form.action.includes('login') || btn.form.action.includes('register') || btn.form.action.includes('password'))) {
-                return;
-            }
-            
-            btn.addEventListener('click', function(e) {
-                // Only add loading state if form is valid and not already processing
+        // Only show "Processing" for forms that opt-in via js-ajax-form (avoids stuck state on validation/500)
+        document.querySelectorAll('form.js-ajax-form button[type="submit"]').forEach(btn => {
+            if (btn.form && (btn.form.action.includes('login') || btn.form.action.includes('register') || btn.form.action.includes('password'))) return;
+            btn.addEventListener('click', function() {
                 if (this.form && this.form.checkValidity() && !this.disabled) {
                     this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
                     this.disabled = true;
-                    
-                    // Allow the form to submit naturally
-                    // Don't prevent default behavior
                 }
             });
         });

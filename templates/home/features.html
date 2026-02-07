@@ -1,0 +1,38 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Features - MOFA Task Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-lg-5 py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header bg-transparent border-0 py-4">
+                    <h2 class="mb-0"><i class="fas fa-star me-2"></i>Features</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-tasks me-2 text-primary"></i>Tasks</h5>
+                            <p class="text-muted">Create, assign, and track tasks with due dates, priority, and categories. Comments and attachments supported.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-laptop me-2 text-primary"></i>Equipment</h5>
+                            <p class="text-muted">Manage ICT equipment, assign devices to directorates, track issues and returns.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-chart-bar me-2 text-primary"></i>Reports</h5>
+                            <p class="text-muted">Task analytics, team performance, monthly reports, and data export.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-users me-2 text-primary"></i>Users</h5>
+                            <p class="text-muted">Profile management, password reset, and admin user management for staff.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

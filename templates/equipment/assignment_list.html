@@ -52,8 +52,9 @@
                         <tr>
                             <th>Equipment</th>
                             <th>Directorate</th>
-                            <th>Assigned To</th>
                             <th>Room</th>
+                            <th>Office Location</th>
+                            <th>Assigned To</th>
                             <th>Issued By</th>
                             <th>Date</th>
                             <th>Actions</th>
@@ -66,10 +67,11 @@
                                 <strong>{{ assignment.equipment.get_equipment_type_display }}</strong><br>
                                 <small class="text-muted">{{ assignment.equipment.brand }} {{ assignment.equipment.model }}</small>
                             </td>
-                            <td>{{ assignment.directorate }}</td>
-                            <td>{{ assignment.assigned_to.get_full_name|default:assignment.assigned_to.username }}</td>
-                            <td>{{ assignment.room_number|default:"N/A" }}</td>
-                            <td>{{ assignment.issued_by.get_full_name|default:assignment.issued_by.username }}</td>
+                            <td>{{ assignment.directorate|default:"—" }}</td>
+                            <td>{{ assignment.room_number|default:"—" }}</td>
+                            <td>{{ assignment.office_location|default:"—" }}</td>
+                            <td>{% if assignment.assigned_to %}{{ assignment.assigned_to.get_full_name|default:assignment.assigned_to.username }}{% else %}—{% endif %}</td>
+                            <td>{% if assignment.issued_by %}{{ assignment.issued_by.get_full_name|default:assignment.issued_by.username }}{% else %}—{% endif %}</td>
                             <td>{{ assignment.assigned_date|date:"M d, Y" }}</td>
                             <td>
                                 <a href="{% url 'equipment:assignment_return' assignment.pk %}" class="btn btn-sm btn-outline-warning" onclick="return confirm('Are you sure you want to return this device?');">
@@ -79,7 +81,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No active assignments found</td>
+                            <td colspan="8" class="text-center text-muted">No active assignments found</td>
                         </tr>
                         {% endfor %}
                     </tbody>
