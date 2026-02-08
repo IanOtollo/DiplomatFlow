@@ -91,8 +91,12 @@
                                 {% with assignment=equipment.get_current_assignment %}
                                     {% if assignment %}
                                         <small>
-                                            <i class="fas fa-building me-1"></i>{{ assignment.directorate }}<br>
-                                            <i class="fas fa-user me-1"></i>{{ assignment.assigned_to.get_full_name|default:assignment.assigned_to.username }}
+                                            <i class="fas fa-building me-1"></i>{{ assignment.directorate|default:"No Directorate" }}<br>
+                                            {% if assignment.assigned_to %}
+                                                <i class="fas fa-user me-1"></i>{{ assignment.assigned_to.get_full_name|default:assignment.assigned_to.username }}
+                                            {% else %}
+                                                <i class="fas fa-user-slash me-1 text-muted"></i>Unassigned User
+                                            {% endif %}
                                         </small>
                                     {% else %}
                                         <span class="text-muted">Not assigned</span>

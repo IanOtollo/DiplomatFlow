@@ -58,6 +58,12 @@ class ICTEquipmentForm(forms.ModelForm):
                 HTML('<a href="{% url "equipment:equipment_list" %}" class="btn btn-secondary">Cancel</a>'),
             )
         )
+    
+    def clean_asset_tag(self):
+        asset_tag = self.cleaned_data.get('asset_tag')
+        if not asset_tag:
+            return None
+        return asset_tag
 
 
 class DeviceAssignmentForm(forms.ModelForm):

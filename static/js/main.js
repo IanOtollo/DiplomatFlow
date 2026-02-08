@@ -1,5 +1,5 @@
 /**
- * FUTURISTIC MOFA TASK TRACKER - MAIN JAVASCRIPT
+ * IT HELPDESK SYSTEM - MAIN JAVASCRIPT
  * Advanced interactions, animations, and effects
  */
 
@@ -14,7 +14,7 @@ class FuturisticApp {
     }
 
     init() {
-        console.log('🚀 Futuristic MOFA Task Tracker initialized');
+        console.log('🚀 IT Helpdesk System initialized');
         this.addLoadingStates();
         this.setupKeyboardShortcuts();
     }
